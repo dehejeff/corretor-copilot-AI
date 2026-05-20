@@ -97,3 +97,50 @@ export interface CallNote {
   metadata: Record<string, unknown>;
   created_at: string;
 }
+
+export interface Conversation {
+  id: string;
+  user_id: string;
+  lead_id: string;
+  channel: string;
+  provider: string;
+  provider_chat_id: string | null;
+  last_message_at: string | null;
+  last_inbound_at: string | null;
+  last_outbound_at: string | null;
+  unread_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConversationMessage {
+  id: string;
+  conversation_id: string;
+  lead_id: string;
+  user_id: string;
+  direction: "inbound" | "outbound";
+  channel: string;
+  provider_message_id: string | null;
+  provider_status: string;
+  message_type: string;
+  text_content: string | null;
+  media_url: string | null;
+  metadata_json: Record<string, unknown>;
+  sent_at: string | null;
+  delivered_at: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface ConversationSuggestion {
+  id: string;
+  conversation_id: string;
+  lead_id: string;
+  user_id: string;
+  goal: string | null;
+  input_context: string | null;
+  suggested_message: string;
+  edited_message: string | null;
+  was_sent: boolean;
+  created_at: string;
+}

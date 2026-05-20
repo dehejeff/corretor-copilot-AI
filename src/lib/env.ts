@@ -15,4 +15,10 @@ export const env = {
   openAIApiKey: () => getRequiredEnv("OPENAI_API_KEY"),
   cronSecret: () => getRequiredEnv("CRON_SECRET"),
   appUrl: () => process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  whatsappAccessToken: () => getRequiredEnv("WHATSAPP_ACCESS_TOKEN"),
+  whatsappPhoneNumberId: () => getRequiredEnv("WHATSAPP_PHONE_NUMBER_ID"),
+  whatsappBusinessAccountId: () => getRequiredEnv("WHATSAPP_BUSINESS_ACCOUNT_ID"),
+  whatsappWebhookVerifyToken: () => getRequiredEnv("WHATSAPP_WEBHOOK_VERIFY_TOKEN"),
+  whatsappAppSecret: () => getRequiredEnv("WHATSAPP_APP_SECRET"),
+  whatsappApiVersion: () => process.env.WHATSAPP_API_VERSION || "v21.0",
 };

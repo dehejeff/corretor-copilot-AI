@@ -59,6 +59,17 @@ export const callSuggestionSchema = z.object({
   goal: z.string().optional().default(""),
 });
 
+export const conversationSuggestionSchema = z.object({
+  leadId: z.uuid(),
+  goal: z.string().optional().default(""),
+  draftInstruction: z.string().optional().default(""),
+});
+
+export const sendConversationMessageSchema = z.object({
+  leadId: z.uuid(),
+  message: z.string().min(1, "Informe a mensagem."),
+});
+
 export const saveCallSchema = z.object({
   currentStep: z.string().min(1),
   callStartedAt: z.string().optional().default(""),

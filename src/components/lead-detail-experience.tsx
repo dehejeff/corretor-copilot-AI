@@ -3,28 +3,44 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowLeft, Bot, ChevronDown, ChevronUp, MessageCircle, Sparkles } from "lucide-react";
-import type { Interaction, Lead, Profile } from "@/lib/types";
+import type {
+  Conversation,
+  ConversationMessage,
+  ConversationSuggestion,
+  Interaction,
+  Lead,
+  Profile,
+} from "@/lib/types";
 import {
   buildWhatsappUrl,
   formatCurrency,
   formatDate,
   formatRelativeDate,
 } from "@/lib/utils";
+import { ConversationPanel } from "@/components/conversation-panel";
 import { MessageGenerator } from "@/components/message-generator";
 import { LeadCallGuide } from "@/components/lead-call-guide";
 
-type TabId = "dados" | "historico" | "ia";
+type TabId = "dados" | "historico" | "conversa" | "ia";
 
 export function LeadDetailExperience({
   lead,
   profile,
   interactions,
   nextAction,
+  conversation,
+  conversationMessages,
+  conversationSuggestions,
+  whatsappConfigured,
 }: {
   lead: Lead;
   profile: Profile;
   interactions: Interaction[];
   nextAction: string;
+  conversation: Conversation | null;
+  conversationMessages: ConversationMessage[];
+  conversationSuggestions: ConversationSuggestion[];
+  whatsappConfigured: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<TabId>("dados");
   const [callGuideExpanded, setCallGuideExpanded] = useState(false);
@@ -138,6 +154,12 @@ export function LeadDetailExperience({
           Histórico
         </TabButton>
         <TabButton
+          active={activeTab === "conversa"}
+          onClick={() => setActiveTab("conversa")}
+        >
+          Conversa
+        </TabButton>
+        <TabButton
           active={activeTab === "ia"}
           onClick={() => setActiveTab("ia")}
         >
@@ -225,6 +247,16 @@ export function LeadDetailExperience({
               )}
             </div>
           </section>
+        ) : null}
+
+        {activeTab === "conversa" ? (
+          <ConversationPanel
+            lead={lead}
+            initialConversation={conversation}
+            initialMessages={conversationMessages}
+            initialSuggestions={conversationSuggestions}
+            whatsappConfigured={whatsappConfigured}
+          />
         ) : null}
 
         {activeTab === "ia" ? (

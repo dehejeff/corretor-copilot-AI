@@ -4,6 +4,7 @@ import { LeadForm } from "@/components/lead-form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ensureProfile, requireUser } from "@/lib/auth";
+import { getConversationThread, getWhatsAppConfigStatus } from "@/lib/conversations";
 import { getLeadById } from "@/lib/leads";
 
 export default async function LeadDetailPage({
@@ -13,9 +14,10 @@ export default async function LeadDetailPage({
 }) {
   const user = await requireUser();
   const { id } = await params;
-  const [{ lead, interactions, nextAction }, profile] = await Promise.all([
+  const [{ lead, interactions, nextAction }, profile, thread] = await Promise.all([
     getLeadById(user.id, id),
     ensureProfile(user),
+    getConversationThread(user.id, id),
   ]);
 
   return (
@@ -25,6 +27,10 @@ export default async function LeadDetailPage({
         profile={profile}
         interactions={interactions}
         nextAction={nextAction}
+        conversation={thread.conversation}
+        conversationMessages={thread.messages}
+        conversationSuggestions={thread.suggestions}
+        whatsappConfigured={getWhatsAppConfigStatus().ok}
       />
 
       <Card className="rounded-[1.75rem]">
