@@ -47,7 +47,7 @@ export default async function DashboardPage() {
         </h1>
       </section>
 
-      <Card className="overflow-hidden rounded-[1.75rem] border-primary/20 bg-gradient-to-br from-primary via-[#10685f] to-[#0b4f59] text-white shadow-[var(--shadow)]">
+      <section className="overflow-hidden rounded-[1.75rem] border border-primary/20 bg-gradient-to-br from-primary via-[#10685f] to-[#0b4f59] p-5 text-white shadow-[var(--shadow)] sm:p-6">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white shadow-sm">
             <CalendarClock className="h-5 w-5" />
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
             Ver tarefas do dia
           </Link>
         </div>
-      </Card>
+      </section>
 
       <section className="grid grid-cols-2 gap-3 xl:grid-cols-5">
         {cards.map(({ label, value, icon: Icon }) => (
