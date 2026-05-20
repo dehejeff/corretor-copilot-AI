@@ -11,7 +11,8 @@ export default async function TasksPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold">Tarefas do dia</h1>
+        <p className="text-xs font-semibold tracking-[0.28em] text-primary uppercase">Agenda</p>
+        <h1 className="mt-1 text-3xl font-bold tracking-tight">Tarefas do dia</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Follow-ups sugeridos pelo backend, prontos para gerar mensagem e abrir o WhatsApp.
         </p>
@@ -24,7 +25,7 @@ export default async function TasksPage() {
           ))}
         </div>
       ) : (
-        <Card>
+        <Card className="rounded-[1.5rem]">
           <p className="text-sm text-muted-foreground">
             Nenhuma tarefa aberta para hoje. Rode o cron ou cadastre leads para gerar novas automações.
           </p>

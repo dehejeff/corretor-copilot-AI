@@ -73,10 +73,13 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
   };
 
   return (
-    <div className="space-y-4 rounded-[1.6rem] border border-border bg-white p-5">
+    <div className="space-y-4 rounded-[1.75rem] border border-border bg-white p-5 shadow-[var(--shadow-soft)]">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold">Gerador de mensagem com IA</p>
+          <p className="text-xs font-semibold tracking-[0.28em] text-primary uppercase">
+            Gerador de mensagem
+          </p>
+          <p className="mt-1 text-lg font-bold">Sugestões por categoria</p>
           <p className="text-sm text-muted-foreground">
             Gere opções por etapa, escolha a melhor base e adapte antes de enviar.
           </p>
@@ -87,6 +90,7 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
       <Select
         value={messageType}
         onChange={(event) => setMessageType(event.target.value as MessageType)}
+        className="rounded-xl"
       >
         {messageTypes.map((type) => (
           <option key={type} value={type}>
@@ -95,7 +99,7 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
         ))}
       </Select>
 
-      <Button type="button" onClick={handleGenerate} disabled={isPending}>
+      <Button type="button" onClick={handleGenerate} disabled={isPending} className="w-full sm:w-auto">
         {isPending ? "Gerando..." : "Gerar opções"}
       </Button>
 
@@ -120,7 +124,7 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
                   className={`w-full rounded-2xl border p-3 text-left ${
                     isActive
                       ? "border-primary bg-accent/70 shadow-sm"
-                      : "border-border bg-muted/30 hover:bg-accent/40"
+                      : "border-border bg-surface-low hover:bg-accent/40"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -151,7 +155,7 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
         href={buildWhatsappUrl(lead.phone, message)}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-2 rounded-2xl border border-border bg-accent px-4 py-3 text-sm font-semibold text-foreground"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground sm:w-auto"
       >
         <MessageSquareText className="h-4 w-4" />
         Abrir WhatsApp

@@ -248,7 +248,7 @@ export function LeadCallGuide({ lead, profile }: { lead: Lead; profile: Profile 
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
         <div className="space-y-3">
           {callStepOrder.map((stepId, index) => (
             <CallStepCard
@@ -263,10 +263,12 @@ export function LeadCallGuide({ lead, profile }: { lead: Lead; profile: Profile 
           ))}
         </div>
 
-        <div className="rounded-[1.8rem] border border-border bg-white p-5 shadow-[var(--shadow)]">
+        <div className="rounded-[1.8rem] border border-border bg-white p-5 shadow-[var(--shadow-soft)]">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-primary">Ligação</p>
+              <p className="text-xs font-semibold tracking-[0.28em] text-primary uppercase">
+                Ligação
+              </p>
               <h2 className="mt-1 text-2xl font-semibold">{currentStepContent.title}</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                 {currentStepContent.objective}
@@ -447,7 +449,7 @@ export function LeadCallGuide({ lead, profile }: { lead: Lead; profile: Profile 
             </div>
 
             <div className="space-y-4">
-              <section className="rounded-[1.4rem] border border-border bg-muted/20 p-4">
+              <section className="rounded-[1.4rem] border border-border bg-surface-low p-4">
                 <p className="text-sm font-semibold">Notas rápidas da ligação</p>
                 <Textarea
                   className="mt-3"
@@ -459,7 +461,7 @@ export function LeadCallGuide({ lead, profile }: { lead: Lead; profile: Profile 
                 />
               </section>
 
-              <section className="rounded-[1.4rem] border border-border bg-muted/20 p-4">
+              <section className="rounded-[1.4rem] border border-border bg-surface-low p-4">
                 <p className="text-sm font-semibold">Qualificação do lead</p>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   <Field label="Tipo de imóvel">

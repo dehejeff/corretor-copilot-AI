@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, BrainCircuit, KanbanSquare, MessageCircleMore, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  BrainCircuit,
+  KanbanSquare,
+  MessageCircleMore,
+  ShieldCheck,
+} from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { APP_NAME } from "@/lib/constants";
 
@@ -12,9 +18,9 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="bg-grid min-h-screen overflow-hidden">
-      <section className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8 lg:px-10">
-        <header className="glass flex items-center justify-between rounded-full border border-white/60 px-5 py-3 shadow-[var(--shadow)]">
+    <main className="min-h-screen overflow-hidden bg-background">
+      <section className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+        <header className="surface-card flex items-center justify-between rounded-full border border-border px-5 py-3 shadow-[var(--shadow-soft)]">
           <div>
             <p className="text-sm font-semibold tracking-[0.24em] text-primary uppercase">
               {APP_NAME}
@@ -29,7 +35,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/signup"
-              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:-translate-y-0.5"
+              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/95"
             >
               Criar conta
             </Link>
@@ -41,20 +47,20 @@ export default async function HomePage() {
           <div className="grid gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div className="max-w-2xl">
               <span className="inline-flex rounded-full border border-primary/20 bg-white px-4 py-2 text-sm text-primary shadow-sm">
-                CRM com IA, scoring e follow-up por codigo
+                CRM com IA, scoring e follow-up por código
               </span>
-              <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-                Transforme leads imobiliarios em compradores reais pelo WhatsApp.
+              <h1 className="mt-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl">
+                Transforme leads imobiliários em compradores reais pelo WhatsApp.
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
-                Uma plataforma mobile-first para corretores organizarem leads, priorizarem oportunidades e agir com contexto, rapidez e consistencia.
+                Uma plataforma mobile-first para corretores organizarem leads, priorizarem oportunidades e agir com contexto, rapidez e consistência.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/signup"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 font-semibold text-primary-foreground shadow-[var(--shadow)] hover:-translate-y-0.5"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 font-semibold text-primary-foreground shadow-[var(--shadow)] hover:bg-primary/95"
                 >
-                  Comecar o MVP
+                  Começar o MVP
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
@@ -66,7 +72,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="glass rounded-[2rem] border border-white/70 p-5 shadow-[var(--shadow)]">
+            <div className="surface-card rounded-[2rem] border border-border p-5 shadow-[var(--shadow)]">
               <div className="rounded-[1.6rem] bg-slate-950 p-5 text-slate-50">
                 <div className="flex items-center justify-between">
                   <div>
@@ -115,15 +121,15 @@ export default async function HomePage() {
               },
               {
                 icon: ShieldCheck,
-                title: "Seguro por usuario",
-                text: "Cada corretor enxerga apenas os proprios leads com base em RLS no Supabase.",
+                title: "Seguro por usuário",
+                text: "Cada corretor enxerga apenas os próprios leads com base em RLS no Supabase.",
               },
             ].map(({ icon: Icon, title, text }) => (
               <div key={title} className="rounded-[1.75rem] border border-white/70 bg-white/85 p-5 shadow-[var(--shadow)]">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-primary">
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+                <h3 className="mt-4 text-lg font-bold">{title}</h3>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
               </div>
             ))}

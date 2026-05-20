@@ -1,20 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f7fb;
-  --foreground: #102033;
+  --background: #f6f8fb;
+  --foreground: #172033;
   --card: #ffffff;
-  --card-foreground: #102033;
-  --muted: #e8eef6;
-  --muted-foreground: #607089;
-  --border: rgba(16, 32, 51, 0.1);
+  --card-foreground: #172033;
+  --muted: #eef2f6;
+  --muted-foreground: #627089;
+  --border: rgba(23, 32, 51, 0.11);
   --primary: #0f766e;
-  --primary-foreground: #f4fffd;
+  --primary-foreground: #f7fffd;
   --accent: #d7f3ee;
+  --accent-strong: #c2ede4;
+  --surface-low: #f2f4f7;
+  --surface-high: #e7ebf0;
   --danger: #dc2626;
   --warning: #c47f00;
   --success: #15803d;
-  --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  --shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.04);
 }
 
 @theme inline {
@@ -28,22 +32,28 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-surface-low: var(--surface-low);
+  --color-surface-high: var(--surface-high);
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --color-success: var(--success);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Hanken Grotesk", "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
 }
 
 * {
   border-color: var(--border);
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
+  min-height: 100%;
   scroll-behavior: smooth;
 }
 
 body {
+  min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
@@ -63,6 +73,10 @@ button {
   background: rgba(15, 118, 110, 0.18);
 }
 
+.text-balance {
+  text-wrap: balance;
+}
+
 .bg-grid {
   background-image:
     linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
@@ -73,4 +87,13 @@ button {
 .glass {
   backdrop-filter: blur(12px);
   background: rgba(255, 255, 255, 0.78);
+}
+
+.surface-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+}
+
+.surface-line {
+  border: 1px solid rgba(23, 32, 51, 0.08);
 }

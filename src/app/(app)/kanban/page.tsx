@@ -10,13 +10,14 @@ export default async function KanbanPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold">Kanban comercial</h1>
+        <p className="text-xs font-semibold tracking-[0.28em] text-primary uppercase">Pipeline</p>
+        <h1 className="mt-1 text-3xl font-bold tracking-tight">Kanban comercial</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Arraste os cards entre os status principais do pipeline ou atualize direto nos detalhes do lead.
         </p>
       </div>
 
-      <Card className="overflow-hidden p-4 xl:p-5">
+      <Card className="overflow-hidden rounded-[1.75rem] p-4 xl:p-5">
         <KanbanBoard leads={leads} />
       </Card>
     </div>
