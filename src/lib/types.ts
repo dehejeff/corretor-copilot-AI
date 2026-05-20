@@ -10,6 +10,12 @@ export type LeadStatus = (typeof leadStatuses)[number];
 export type LeadTemperature = (typeof leadTemperatures)[number];
 export type MessageType = (typeof messageTypes)[number];
 
+export interface MessageOption {
+  id: string;
+  tone: string;
+  message: string;
+}
+
 export interface Profile {
   id: string;
   name: string | null;

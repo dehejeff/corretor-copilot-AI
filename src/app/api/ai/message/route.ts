@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateLeadMessage } from "@/lib/ai";
-import { getCurrentUser } from "@/lib/auth";
+import { ensureProfile, getCurrentUser } from "@/lib/auth";
 import { getLeadById, recordInteraction } from "@/lib/leads";
 import { getErrorMessage } from "@/lib/utils";
 import { generateMessageSchema } from "@/lib/validations";
@@ -15,7 +15,8 @@ export async function POST(request: Request) {
 
     const values = generateMessageSchema.parse(await request.json());
     const { lead } = await getLeadById(user.id, values.leadId);
-    const result = await generateLeadMessage(lead, values.messageType);
+    const profile = await ensureProfile(user);
+    const result = await generateLeadMessage(lead, profile, values.messageType);
 
     await recordInteraction({
       userId: user.id,
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       message: result.message,
+      options: result.options,
       provider: result.provider,
       fallbackReason: result.fallbackReason,
     });

@@ -51,3 +51,17 @@ export const messageTypes = [
   "pos_visita",
   "fechamento",
 ] as const;
+
+export const messageTypeLabels = {
+  primeiro_contato: "Primeiro contato",
+  followup_d1: "Follow-up D+1",
+  followup_d3: "Follow-up D+3",
+  followup_d7: "Follow-up D+7",
+  recuperacao_lead_frio: "Recuperação de lead frio",
+  convite_visita: "Convite para visita",
+  objecao_preco: "Objeção de preço",
+  vou_pensar: "Resposta para 'vou pensar'",
+  simulacao_financiamento: "Simulação de financiamento",
+  pos_visita: "Pós-visita",
+  fechamento: "Fechamento",
+} as const;
