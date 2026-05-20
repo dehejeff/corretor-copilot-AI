@@ -12,7 +12,7 @@ export async function PATCH(
     const user = await getCurrentUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Nao autenticado." }, { status: 401 });
+      return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
     }
 
     const { id } = await params;

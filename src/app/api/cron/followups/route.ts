@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const secret = authHeader?.replace("Bearer ", "") || new URL(request.url).searchParams.get("secret");
 
     if (secret !== env.cronSecret()) {
-      return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
+      return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
     const result = await runFollowupCron();

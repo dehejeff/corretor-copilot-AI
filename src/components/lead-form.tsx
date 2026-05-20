@@ -1,5 +1,6 @@
 import { leadSources, leadStatuses } from "@/lib/constants";
 import type { Lead } from "@/lib/types";
+import { CurrencyInput, PhoneInput } from "@/components/formatted-fields";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -22,7 +23,7 @@ export function LeadForm({
           <Input name="name" defaultValue={initialLead?.name ?? ""} required />
         </Field>
         <Field label="Telefone / WhatsApp">
-          <Input name="phone" defaultValue={initialLead?.phone ?? ""} />
+          <PhoneInput name="phone" defaultValue={initialLead?.phone} />
         </Field>
         <Field label="E-mail">
           <Input name="email" type="email" defaultValue={initialLead?.email ?? ""} />
@@ -39,26 +40,37 @@ export function LeadForm({
         <Field label="Bairro de interesse">
           <Input name="neighborhood" defaultValue={initialLead?.neighborhood ?? ""} />
         </Field>
-        <Field label="Tipo de imovel">
+        <Field label="Tipo de imóvel">
           <Input name="property_type" defaultValue={initialLead?.property_type ?? ""} />
         </Field>
-        <Field label="Faixa de preco">
-          <Input name="price_range" defaultValue={initialLead?.price_range ?? ""} />
+        <Field label="Faixa de preço">
+          <Input
+            name="price_range"
+            defaultValue={initialLead?.price_range ?? ""}
+            placeholder="Ex.: R$ 250.000 a R$ 350.000"
+          />
         </Field>
         <Field label="Valor de entrada">
-          <Input
+          <CurrencyInput
             name="down_payment"
-            type="number"
-            min="0"
-            step="0.01"
             defaultValue={initialLead?.down_payment ?? ""}
+            placeholder="R$ 20.000,00"
           />
         </Field>
         <Field label="Renda aproximada">
-          <Input name="income_range" defaultValue={initialLead?.income_range ?? ""} />
+          <CurrencyInput
+            name="income_range"
+            defaultValue={initialLead?.income_range ?? ""}
+            placeholder="R$ 4.500,00"
+            mode="text"
+          />
         </Field>
-        <Field label="Prazo para compra">
-          <Input name="purchase_timeline" defaultValue={initialLead?.purchase_timeline ?? ""} />
+        <Field label="Data prevista para compra">
+          <Input
+            name="purchase_timeline"
+            type="date"
+            defaultValue={initialLead?.purchase_timeline ?? ""}
+          />
         </Field>
         <Field label="Status">
           <Select name="status" defaultValue={initialLead?.status ?? "Novo lead"}>
@@ -71,7 +83,7 @@ export function LeadForm({
         </Field>
       </div>
 
-      <Field label="Observacoes">
+      <Field label="Observações">
         <Textarea name="notes" defaultValue={initialLead?.notes ?? ""} />
       </Field>
 
@@ -80,16 +92,16 @@ export function LeadForm({
           Tem interesse em financiamento
         </CheckLine>
         <CheckLine name="credit_approved" defaultChecked={initialLead?.credit_approved}>
-          Ja tem credito aprovado
+          Já tem crédito aprovado
         </CheckLine>
         <CheckLine name="fgts" defaultChecked={initialLead?.fgts}>
           Pretende usar FGTS
         </CheckLine>
         <CheckLine name="requested_visit" defaultChecked={initialLead?.requested_visit}>
-          Ja pediu visita
+          Já pediu visita
         </CheckLine>
         <CheckLine name="researching_only" defaultChecked={initialLead?.researching_only}>
-          Esta apenas pesquisando
+          Está apenas pesquisando
         </CheckLine>
       </div>
 

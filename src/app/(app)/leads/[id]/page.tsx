@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
 import { getLeadById } from "@/lib/leads";
-import { buildWhatsappUrl, formatCurrency, formatRelativeDate } from "@/lib/utils";
+import {
+  buildWhatsappUrl,
+  formatCurrency,
+  formatDate,
+  formatPhone,
+  formatRelativeDate,
+} from "@/lib/utils";
 
 export default async function LeadDetailPage({
   params,
@@ -25,7 +31,7 @@ export default async function LeadDetailPage({
             <div>
               <h1 className="text-3xl font-semibold">{lead.name}</h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                {lead.phone || "Telefone nao informado"} · {lead.email || "E-mail nao informado"}
+                {formatPhone(lead.phone) || "Telefone não informado"} · {lead.email || "E-mail não informado"}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -47,16 +53,16 @@ export default async function LeadDetailPage({
           <div className="grid gap-4 md:grid-cols-2">
             <Info label="Origem" value={lead.source} />
             <Info label="Bairro" value={lead.neighborhood} />
-            <Info label="Tipo de imovel" value={lead.property_type} />
-            <Info label="Faixa de preco" value={lead.price_range} />
+            <Info label="Tipo de imóvel" value={lead.property_type} />
+            <Info label="Faixa de preço" value={lead.price_range} />
             <Info label="Entrada" value={formatCurrency(lead.down_payment)} />
             <Info label="Renda" value={lead.income_range} />
-            <Info label="Prazo" value={lead.purchase_timeline} />
-            <Info label="Ultimo contato" value={formatRelativeDate(lead.last_contact_at)} />
+            <Info label="Data prevista" value={formatDate(lead.purchase_timeline)} />
+            <Info label="Último contato" value={formatRelativeDate(lead.last_contact_at)} />
           </div>
 
           <div className="rounded-[1.6rem] border border-border bg-muted/50 p-4">
-            <p className="text-sm font-semibold">Proxima acao recomendada</p>
+            <p className="text-sm font-semibold">Próxima ação recomendada</p>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">{nextAction}</p>
           </div>
 
@@ -84,7 +90,7 @@ export default async function LeadDetailPage({
       <Card>
         <h2 className="text-xl font-semibold">Editar lead</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Atualize dados, score e situacao comercial sem sair da pagina.
+          Atualize dados, score e situação comercial sem sair da página.
         </p>
         <div className="mt-6">
           <LeadForm
@@ -96,7 +102,7 @@ export default async function LeadDetailPage({
       </Card>
 
       <Card>
-        <h2 className="text-xl font-semibold">Historico de interacoes</h2>
+        <h2 className="text-xl font-semibold">Histórico de interações</h2>
         <div className="mt-5 space-y-3">
           {interactions.map((interaction) => (
             <div key={interaction.id} className="rounded-2xl border border-border bg-muted/30 p-4">
@@ -110,7 +116,7 @@ export default async function LeadDetailPage({
           ))}
           {interactions.length === 0 ? (
             <p className="rounded-2xl bg-muted/50 px-4 py-6 text-sm text-muted-foreground">
-              Ainda nao ha interacoes registradas para este lead.
+              Ainda não há interações registradas para este lead.
             </p>
           ) : null}
         </div>
@@ -123,7 +129,7 @@ function Info({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="rounded-2xl border border-border bg-white p-4">
       <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">{label}</p>
-      <p className="mt-2 text-sm font-medium">{value || "Nao informado"}</p>
+      <p className="mt-2 text-sm font-medium">{value || "Não informado"}</p>
     </div>
   );
 }

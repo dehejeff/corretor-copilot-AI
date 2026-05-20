@@ -74,7 +74,7 @@ export default async function HomePage() {
                     <h2 className="mt-2 text-2xl font-semibold">Tarefas do corretor</h2>
                   </div>
                   <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-teal-100">
-                    4 automacoes
+                    4 automações
                   </span>
                 </div>
                 <div className="mt-5 space-y-3">
@@ -82,7 +82,7 @@ export default async function HomePage() {
                     "Lead quente sem retorno desde ontem",
                     "Follow-up D+3 pronto para envio",
                     "Visita agendada precisa de lembrete",
-                    "IA sugeriu resposta para objeção de preco",
+                    "IA sugeriu resposta para objeção de preço",
                   ].map((item) => (
                     <div
                       key={item}
@@ -101,7 +101,7 @@ export default async function HomePage() {
               {
                 icon: BrainCircuit,
                 title: "Scoring inteligente",
-                text: "Classificacao automatica com foco em velocidade de compra e intencao real.",
+                text: "Classificação automática com foco em velocidade de compra e intenção real.",
               },
               {
                 icon: MessageCircleMore,

@@ -16,7 +16,7 @@ function getFriendlyAuthMessage(message: string) {
   const normalized = message.toLowerCase();
 
   if (normalized.includes("email not confirmed")) {
-    return "Seu e-mail ainda nao foi confirmado. Verifique sua caixa de entrada antes de entrar.";
+    return "Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada antes de entrar.";
   }
 
   if (normalized.includes("invalid login credentials")) {
@@ -24,10 +24,10 @@ function getFriendlyAuthMessage(message: string) {
   }
 
   if (normalized.includes("user already registered")) {
-    return "Este e-mail ja esta cadastrado. Tente entrar na plataforma.";
+    return "Este e-mail já está cadastrado. Tente entrar na plataforma.";
   }
 
-  return "Nao foi possivel concluir a autenticacao agora. Tente novamente.";
+  return "Não foi possível concluir a autenticação agora. Tente novamente.";
 }
 
 export async function loginAction(formData: FormData) {

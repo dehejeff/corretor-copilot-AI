@@ -25,7 +25,7 @@ export default async function SignupPage({
         ) : null}
         <form action={signupAction} className="mt-8 grid gap-4 md:grid-cols-2">
           <Input name="name" placeholder="Seu nome" required />
-          <Input name="companyName" placeholder="Imobiliaria ou equipe" />
+          <Input name="companyName" placeholder="Imobiliária ou equipe" />
           <Input name="phone" placeholder="WhatsApp" />
           <Input name="email" type="email" placeholder="seu@email.com" required />
           <div className="md:col-span-2">
@@ -38,7 +38,7 @@ export default async function SignupPage({
           </div>
         </form>
         <p className="mt-6 text-sm text-muted-foreground">
-          Ja possui acesso?{" "}
+          Já possui acesso?{" "}
           <Link href="/login" className="font-semibold text-primary">
             Entrar
           </Link>

@@ -26,7 +26,7 @@ export default async function TasksPage() {
       ) : (
         <Card>
           <p className="text-sm text-muted-foreground">
-            Nenhuma tarefa aberta para hoje. Rode o cron ou cadastre leads para gerar novas automacoes.
+            Nenhuma tarefa aberta para hoje. Rode o cron ou cadastre leads para gerar novas automações.
           </p>
         </Card>
       )}

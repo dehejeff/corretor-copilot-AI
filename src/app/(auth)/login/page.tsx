@@ -36,7 +36,7 @@ export default async function LoginPage({
           </SubmitButton>
         </form>
         <p className="mt-6 text-sm text-muted-foreground">
-          Ainda nao tem conta?{" "}
+          Ainda não tem conta?{" "}
           <Link href="/signup" className="font-semibold text-primary">
             Criar agora
           </Link>

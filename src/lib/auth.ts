@@ -40,7 +40,7 @@ export async function ensureProfile(user: User): Promise<Profile> {
     .single();
 
   if (error) {
-    throw new Error(`Nao foi possivel sincronizar o perfil: ${error.message}`);
+    throw new Error(`Não foi possível sincronizar o perfil: ${error.message}`);
   }
 
   return data as Profile;

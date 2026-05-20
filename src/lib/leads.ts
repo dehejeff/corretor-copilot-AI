@@ -59,7 +59,7 @@ export async function createLead(userId: string, values: Partial<Lead>) {
     .single();
 
   if (error) {
-    throw new Error(`Nao foi possivel criar o lead: ${error.message}`);
+    throw new Error(`Não foi possível criar o lead: ${error.message}`);
   }
 
   return data as Lead;
@@ -78,7 +78,7 @@ export async function updateLead(userId: string, leadId: string, values: Partial
     .single();
 
   if (error) {
-    throw new Error(`Nao foi possivel atualizar o lead: ${error.message}`);
+    throw new Error(`Não foi possível atualizar o lead: ${error.message}`);
   }
 
   return data as Lead;
@@ -93,7 +93,7 @@ export async function getLeads(userId: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error(`Nao foi possivel listar leads: ${error.message}`);
+    throw new Error(`Não foi possível listar leads: ${error.message}`);
   }
 
   return (data ?? []) as Lead[];
@@ -114,11 +114,11 @@ export async function getLeadById(userId: string, leadId: string) {
     ]);
 
   if (leadError) {
-    throw new Error(`Nao foi possivel carregar o lead: ${leadError.message}`);
+    throw new Error(`Não foi possível carregar o lead: ${leadError.message}`);
   }
 
   if (interactionsError) {
-    throw new Error(`Nao foi possivel carregar interacoes: ${interactionsError.message}`);
+    throw new Error(`Não foi possível carregar interações: ${interactionsError.message}`);
   }
 
   return {
@@ -159,7 +159,7 @@ export async function getTasksForToday(userId: string) {
     .order("due_date", { ascending: true });
 
   if (error) {
-    throw new Error(`Nao foi possivel carregar tarefas: ${error.message}`);
+    throw new Error(`Não foi possível carregar tarefas: ${error.message}`);
   }
 
   return (data ?? []) as Task[];
@@ -178,13 +178,13 @@ export async function markTaskAsDone(userId: string, taskId: string) {
     .eq("user_id", userId);
 
   if (error) {
-    throw new Error(`Nao foi possivel concluir a tarefa: ${error.message}`);
+    throw new Error(`Não foi possível concluir a tarefa: ${error.message}`);
   }
 }
 
 export async function updateLeadStatus(userId: string, leadId: string, status: LeadStatus) {
   if (!leadStatuses.includes(status)) {
-    throw new Error("Status invalido.");
+    throw new Error("Status inválido.");
   }
 
   const supabase = await createClient();
@@ -196,7 +196,7 @@ export async function updateLeadStatus(userId: string, leadId: string, status: L
     .eq("user_id", userId);
 
   if (error) {
-    throw new Error(`Nao foi possivel atualizar o status: ${error.message}`);
+    throw new Error(`Não foi possível atualizar o status: ${error.message}`);
   }
 }
 
@@ -220,7 +220,7 @@ export async function recordInteraction(input: {
   });
 
   if (error) {
-    throw new Error(`Nao foi possivel registrar interacao: ${error.message}`);
+    throw new Error(`Não foi possível registrar a interação: ${error.message}`);
   }
 }
 

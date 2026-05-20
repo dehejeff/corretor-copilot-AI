@@ -1,3 +1,4 @@
+import { differenceInCalendarDays, isValid, parseISO } from "date-fns";
 import type { Lead, LeadTemperature } from "@/lib/types";
 
 export function calculateLeadScore(input: Partial<Lead>) {
@@ -6,9 +7,18 @@ export function calculateLeadScore(input: Partial<Lead>) {
   if (input.down_payment && input.down_payment > 0) score += 20;
 
   if (input.purchase_timeline) {
-    const timeline = input.purchase_timeline.toLowerCase();
-    if (timeline.includes("30") || timeline.includes("1 mes") || timeline.includes("imediat")) {
-      score += 30;
+    const parsedDate = parseISO(input.purchase_timeline);
+
+    if (isValid(parsedDate)) {
+      const daysUntilPurchase = differenceInCalendarDays(parsedDate, new Date());
+      if (daysUntilPurchase >= 0 && daysUntilPurchase <= 30) {
+        score += 30;
+      }
+    } else {
+      const timeline = input.purchase_timeline.toLowerCase();
+      if (timeline.includes("30") || timeline.includes("1 mês") || timeline.includes("imediat")) {
+        score += 30;
+      }
     }
   }
 

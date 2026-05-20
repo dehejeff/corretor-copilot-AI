@@ -26,7 +26,7 @@ export function AppShell({
             <p className="text-xs tracking-[0.24em] text-teal-200 uppercase">{APP_NAME}</p>
             <p className="mt-3 text-2xl font-semibold">CRM do corretor</p>
             <p className="mt-2 text-sm text-slate-300">
-              Leads, automacoes e WhatsApp no mesmo fluxo.
+              Leads, automações e WhatsApp no mesmo fluxo.
             </p>
           </div>
 

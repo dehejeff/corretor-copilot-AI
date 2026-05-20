@@ -45,7 +45,7 @@ export function KanbanBoard({ leads }: { leads: Lead[] }) {
                 >
                   <p className="font-medium">{lead.name}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {lead.neighborhood || "Bairro nao informado"}
+                    {lead.neighborhood || "Bairro não informado"}
                   </p>
                   <div className="mt-3 flex items-center justify-between">
                     <Badge

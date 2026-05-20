@@ -21,7 +21,7 @@ export default async function DashboardPage() {
     { label: "Leads frios", value: stats.cold, icon: MessageSquareWarning },
     { label: "Sem contato", value: stats.stale, icon: TimerReset },
     { label: "Visitas agendadas", value: stats.visits, icon: WalletCards },
-    { label: "Negociacoes", value: stats.negotiation, icon: ArrowRight },
+    { label: "Negociações", value: stats.negotiation, icon: ArrowRight },
   ];
 
   return (
@@ -32,7 +32,7 @@ export default async function DashboardPage() {
           <div>
             <h1 className="text-3xl font-semibold">Bom trabalho, {profile.name?.split(" ")[0] || "corretor"}.</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-              Priorize os leads mais quentes, mantenha o follow-up vivo e use a IA para responder com mais consistencia.
+              Priorize os leads mais quentes, mantenha o follow-up vivo e use a IA para responder com mais consistência.
             </p>
           </div>
           <Link href="/tasks" className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white">
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
           <div>
             <h2 className="text-xl font-semibold">Foco de hoje</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Tarefas abertas geradas manualmente ou pelo motor de automacao.
+              Tarefas abertas geradas manualmente ou pelo motor de automação.
             </p>
           </div>
           <Link href="/tasks" className="text-sm font-semibold text-primary">
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
           ))}
           {tasks.length === 0 ? (
             <p className="rounded-2xl bg-muted/50 px-4 py-6 text-sm text-muted-foreground">
-              Nenhuma tarefa aberta para hoje. Quando o cron rodar, os follow-ups aparecerao aqui.
+              Nenhuma tarefa aberta para hoje. Quando o cron rodar, os follow-ups aparecerão aqui.
             </p>
           ) : null}
         </div>

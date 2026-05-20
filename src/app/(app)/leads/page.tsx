@@ -15,7 +15,7 @@ export default async function LeadsPage() {
         <div>
           <h1 className="text-3xl font-semibold">Leads</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Sua base completa com score, classificacao e proximo passo.
+            Sua base completa com score, classificação e próximo passo.
           </p>
         </div>
         <Link href="/leads/new" className="rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground">
@@ -41,7 +41,7 @@ export default async function LeadsPage() {
                 <tr key={lead.id} className="border-t border-border">
                   <td className="px-5 py-4">
                     <p className="font-semibold">{lead.name}</p>
-                    <p className="mt-1 text-muted-foreground">{lead.neighborhood || "Bairro nao informado"}</p>
+                    <p className="mt-1 text-muted-foreground">{lead.neighborhood || "Bairro não informado"}</p>
                   </td>
                   <td className="px-5 py-4">{lead.source}</td>
                   <td className="px-5 py-4">{lead.status}</td>

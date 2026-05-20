@@ -70,7 +70,7 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
       <Textarea
         value={message}
         onChange={(event) => setMessage(event.target.value)}
-        placeholder="A mensagem gerada aparecera aqui."
+        placeholder="A mensagem gerada aparecerá aqui."
       />
 
       {error ? <p className="text-sm text-danger">{error}</p> : null}

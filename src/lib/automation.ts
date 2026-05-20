@@ -34,20 +34,20 @@ const definitions: Record<string, AutomationDefinition> = {
   },
   hot_no_action: {
     type: "hot_no_action",
-    title: "Lead quente sem acao",
-    description: (lead) => `${lead.name} esta quente e sem tratativa recente.`,
+    title: "Lead quente sem ação",
+    description: (lead) => `${lead.name} está quente e sem tratativa recente.`,
     suggestedMessage: (lead) =>
       `Oi, ${lead.name.split(" ")[0]}! Tenho uma sugestao bem aderente ao que voce procura e acho que vale te apresentar hoje.`,
   },
   warm_forgotten: {
     type: "warm_forgotten",
     title: "Lead morno esquecido",
-    description: (lead) => `Reaquecer ${lead.name} com proximo passo consultivo.`,
+    description: (lead) => `Reaquecer ${lead.name} com próximo passo consultivo.`,
     suggestedMessage: (lead) => getRecommendedNextAction(lead),
   },
   cold_nurture: {
     type: "cold_nurture",
-    title: "Nutricao de lead frio",
+    title: "Nutrição de lead frio",
     description: (lead) => `Nutrir ${lead.name} com conteudo e oportunidade.`,
     suggestedMessage: (lead) =>
       `Oi, ${lead.name.split(" ")[0]}! Posso te mandar uma leitura simples sobre financiamento, entrada e oportunidades no seu perfil.`,
@@ -57,7 +57,7 @@ const definitions: Record<string, AutomationDefinition> = {
     title: "Lembrete de visita",
     description: (lead) => `Confirmar visita agendada com ${lead.name}.`,
     suggestedMessage: (lead) =>
-      `Oi, ${lead.name.split(" ")[0]}! Confirmando nossa visita e me colocando a disposicao para qualquer ajuste antes do horario combinado.`,
+      `Oi, ${lead.name.split(" ")[0]}! Confirmando nossa visita e me colocando à disposição para qualquer ajuste antes do horário combinado.`,
   },
 };
 
