@@ -81,3 +81,19 @@ export interface Task {
   completed_at: string | null;
   lead?: Lead;
 }
+
+export interface CallNote {
+  id: string;
+  user_id: string;
+  lead_id: string;
+  call_started_at: string | null;
+  call_ended_at: string | null;
+  call_result: string;
+  summary: string | null;
+  objections: string[];
+  next_action: string | null;
+  next_followup_at: string | null;
+  lead_temperature_after_call: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}

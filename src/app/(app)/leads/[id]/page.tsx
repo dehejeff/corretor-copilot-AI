@@ -1,10 +1,11 @@
 import { deleteLeadAction, updateLeadAction } from "@/app/(app)/actions";
 import { LeadForm } from "@/components/lead-form";
+import { LeadCallGuide } from "@/components/lead-call-guide";
 import { MessageGenerator } from "@/components/message-generator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { requireUser } from "@/lib/auth";
+import { ensureProfile, requireUser } from "@/lib/auth";
 import { getLeadById } from "@/lib/leads";
 import {
   buildWhatsappUrl,
@@ -21,7 +22,10 @@ export default async function LeadDetailPage({
 }) {
   const user = await requireUser();
   const { id } = await params;
-  const { lead, interactions, nextAction } = await getLeadById(user.id, id);
+  const [{ lead, interactions, nextAction }, profile] = await Promise.all([
+    getLeadById(user.id, id),
+    ensureProfile(user),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -86,6 +90,16 @@ export default async function LeadDetailPage({
 
         <MessageGenerator lead={lead} />
       </div>
+
+      <Card>
+        <h2 className="text-xl font-semibold">Ligação</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Use um roteiro guiado para conduzir a chamada, registrar respostas e definir o próximo passo sem perder o contexto do lead.
+        </p>
+        <div className="mt-6">
+          <LeadCallGuide lead={lead} profile={profile} />
+        </div>
+      </Card>
 
       <Card>
         <h2 className="text-xl font-semibold">Editar lead</h2>

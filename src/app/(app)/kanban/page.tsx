@@ -16,7 +16,7 @@ export default async function KanbanPage() {
         </p>
       </div>
 
-      <Card>
+      <Card className="overflow-hidden p-4 xl:p-5">
         <KanbanBoard leads={leads} />
       </Card>
     </div>

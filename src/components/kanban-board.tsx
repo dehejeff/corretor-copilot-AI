@@ -61,7 +61,7 @@ export function KanbanBoard({ leads }: { leads: Lead[] }) {
             return (
               <div
                 key={status}
-                className={`flex min-h-[560px] w-[300px] shrink-0 flex-col rounded-[1.8rem] border bg-white p-4 ${
+                className={`flex min-h-[560px] w-[220px] shrink-0 flex-col rounded-[1.8rem] border bg-white p-4 xl:w-[228px] 2xl:w-[236px] ${
                   isHovered ? "border-primary bg-accent/30" : "border-border"
                 }`}
                 onDragOver={(event) => {

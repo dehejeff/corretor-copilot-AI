@@ -20,8 +20,8 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-4 lg:grid-cols-[240px_1fr] lg:px-6">
-        <aside className="glass rounded-[2rem] border border-white/80 p-4 shadow-[var(--shadow)]">
+      <div className="grid min-h-screen gap-4 px-3 py-3 lg:grid-cols-[228px_minmax(0,1fr)] lg:px-4 xl:grid-cols-[236px_minmax(0,1fr)] xl:px-5">
+        <aside className="glass rounded-[1.8rem] border border-white/80 p-4 shadow-[var(--shadow)] lg:sticky lg:top-3 lg:h-[calc(100vh-1.5rem)] lg:overflow-y-auto">
           <div className="rounded-[1.6rem] bg-slate-950 p-5 text-slate-50">
             <p className="text-xs tracking-[0.24em] text-teal-200 uppercase">{APP_NAME}</p>
             <p className="mt-3 text-2xl font-semibold">CRM do corretor</p>
@@ -63,7 +63,7 @@ export function AppShell({
           </div>
         </aside>
 
-        <div className="space-y-6">{children}</div>
+        <main className="min-w-0 space-y-6">{children}</main>
       </div>
     </div>
   );
