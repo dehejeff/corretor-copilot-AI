@@ -13,6 +13,7 @@ type DashboardStats = {
   stale: number;
   visits: number;
   negotiation: number;
+  closed: number;
 };
 
 function buildLeadPayload(userId: string, values: Partial<Lead>) {
@@ -143,6 +144,7 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
     }).length,
     visits: leads.filter((lead) => lead.status === "Visita agendada").length,
     negotiation: leads.filter((lead) => lead.status === "Em negociação").length,
+    closed: leads.filter((lead) => lead.status === "Fechado").length,
   };
 }
 

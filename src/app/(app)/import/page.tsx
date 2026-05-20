@@ -2,6 +2,11 @@ import { importLeadsAction } from "@/app/(app)/actions";
 import { Card } from "@/components/ui/card";
 import { SubmitButton } from "@/components/ui/submit-button";
 
+const csvTemplate = [
+  "nome,telefone,email,origem,bairro,tipo_imovel,faixa_preco,observacoes",
+  "Maria Silva,11999999999,maria@email.com,Instagram,Campo Grande,Apartamento,\"R$ 250.000 a R$ 350.000\",Quer usar FGTS",
+].join("\n");
+
 export default function ImportPage() {
   return (
     <div className="space-y-6">
@@ -11,6 +16,13 @@ export default function ImportPage() {
         <p className="mt-2 text-sm text-muted-foreground">
           Envie um arquivo Excel ou CSV com colunas como nome, telefone, email, origem, bairro, tipo_imovel, faixa_preco e observacoes.
         </p>
+        <a
+          href={`data:text/csv;charset=utf-8,${encodeURIComponent(csvTemplate)}`}
+          download="template-importacao-leads.csv"
+          className="mt-4 inline-flex items-center rounded-xl border border-border bg-white px-4 py-3 text-sm font-semibold text-primary"
+        >
+          Baixar CSV modelo
+        </a>
       </div>
 
       <Card className="rounded-[1.5rem]">

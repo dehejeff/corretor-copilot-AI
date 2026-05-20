@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowLeft, Bot, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, Bot, ChevronDown, ChevronUp, MessageCircle, Sparkles } from "lucide-react";
 import type { Interaction, Lead, Profile } from "@/lib/types";
 import {
   buildWhatsappUrl,
@@ -27,6 +27,7 @@ export function LeadDetailExperience({
   nextAction: string;
 }) {
   const [activeTab, setActiveTab] = useState<TabId>("dados");
+  const [callGuideExpanded, setCallGuideExpanded] = useState(false);
 
   const scoreStroke = useMemo(() => {
     const normalized = Math.min(100, Math.max(0, lead.score));
@@ -239,15 +240,33 @@ export function LeadDetailExperience({
             </section>
 
             <section className="rounded-xl border border-border bg-white p-4">
-              <div className="mb-4">
-                <h4 className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                  Guia de ligação
-                </h4>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Conduza a chamada, registre objeções e defina o próximo passo.
-                </p>
-              </div>
-              <LeadCallGuide lead={lead} profile={profile} />
+              <button
+                type="button"
+                onClick={() => setCallGuideExpanded((current) => !current)}
+                className="flex w-full items-start justify-between gap-3 text-left"
+              >
+                <div>
+                  <h4 className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                    Guia de ligação
+                  </h4>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Conduza a chamada, registre objeções e defina o próximo passo.
+                  </p>
+                </div>
+                <span className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface-low text-muted-foreground">
+                  {callGuideExpanded ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </span>
+              </button>
+
+              {callGuideExpanded ? (
+                <div className="mt-4">
+                  <LeadCallGuide lead={lead} profile={profile} />
+                </div>
+              ) : null}
             </section>
           </div>
         ) : null}

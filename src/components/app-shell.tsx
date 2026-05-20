@@ -36,7 +36,7 @@ export function AppShell({
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 w-full max-w-[1680px] items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <ChartColumnBig className="h-5 w-5" />
@@ -63,7 +63,7 @@ export function AppShell({
         </div>
       </header>
 
-      <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl gap-6 px-4 pb-24 pt-5 sm:px-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:px-8 lg:pb-8">
+      <div className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-[1680px] gap-6 px-4 pb-24 pt-5 sm:px-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:px-8 lg:pb-8">
         <aside className="hidden lg:block">
           <div className="sticky top-21 space-y-4">
             <div className="rounded-[1.75rem] bg-slate-950 p-6 text-slate-50 shadow-[var(--shadow)]">

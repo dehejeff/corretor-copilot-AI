@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarClock,
+  CheckCheck,
   Flame,
   Layers2,
   MessageSquareWarning,
@@ -32,6 +33,7 @@ export default async function DashboardPage() {
     { label: "Sem contato", value: stats.stale, icon: TimerReset },
     { label: "Visitas agendadas", value: stats.visits, icon: WalletCards },
     { label: "Negociações", value: stats.negotiation, icon: ArrowRight },
+    { label: "Fechados", value: stats.closed, icon: CheckCheck },
   ];
 
   return (
@@ -73,7 +75,7 @@ export default async function DashboardPage() {
         </div>
       </Card>
 
-      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-5">
         {cards.map(({ label, value, icon: Icon }) => (
           <Card key={label} className="min-h-[132px] rounded-[1.35rem] p-4">
             <div className="flex items-center justify-between">
