@@ -1,19 +1,10 @@
 import { deleteLeadAction, updateLeadAction } from "@/app/(app)/actions";
+import { LeadDetailExperience } from "@/components/lead-detail-experience";
 import { LeadForm } from "@/components/lead-form";
-import { LeadCallGuide } from "@/components/lead-call-guide";
-import { MessageGenerator } from "@/components/message-generator";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ensureProfile, requireUser } from "@/lib/auth";
 import { getLeadById } from "@/lib/leads";
-import {
-  buildWhatsappUrl,
-  formatCurrency,
-  formatDate,
-  formatPhone,
-  formatRelativeDate,
-} from "@/lib/utils";
 
 export default async function LeadDetailPage({
   params,
@@ -29,80 +20,12 @@ export default async function LeadDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <Card className="space-y-6 rounded-[1.75rem]">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold tracking-[0.28em] text-primary uppercase">
-                Detalhes do lead
-              </p>
-              <h1 className="mt-2 text-4xl font-bold tracking-tight">{lead.name}</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {formatPhone(lead.phone) || "Telefone não informado"} · {lead.email || "E-mail não informado"}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge
-                tone={
-                  lead.temperature === "Quente"
-                    ? "hot"
-                    : lead.temperature === "Morno"
-                      ? "warm"
-                      : "cold"
-                }
-              >
-                {lead.temperature} · {lead.score}
-              </Badge>
-              <Badge>{lead.status}</Badge>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Info label="Origem" value={lead.source} />
-            <Info label="Bairro" value={lead.neighborhood} />
-            <Info label="Tipo de imóvel" value={lead.property_type} />
-            <Info label="Faixa de preço" value={lead.price_range} />
-            <Info label="Entrada" value={formatCurrency(lead.down_payment)} />
-            <Info label="Renda" value={lead.income_range} />
-            <Info label="Data prevista" value={formatDate(lead.purchase_timeline)} />
-            <Info label="Último contato" value={formatRelativeDate(lead.last_contact_at)} />
-          </div>
-
-          <div className="rounded-[1.4rem] border border-primary/10 bg-accent/40 p-4">
-            <p className="text-sm font-semibold text-primary">Copilot insight</p>
-            <p className="mt-2 text-sm leading-6 text-foreground/90">{nextAction}</p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <a
-              href={buildWhatsappUrl(lead.phone)}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"
-            >
-              Abrir conversa no WhatsApp
-            </a>
-            <form action={deleteLeadAction}>
-              <input type="hidden" name="leadId" value={lead.id} />
-              <Button type="submit" variant="danger">
-                Excluir lead
-              </Button>
-            </form>
-          </div>
-        </Card>
-
-        <MessageGenerator lead={lead} />
-      </div>
-
-      <Card className="rounded-[1.75rem]">
-        <h2 className="text-2xl font-bold tracking-tight">Ligação</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Use um roteiro guiado para conduzir a chamada, registrar respostas e definir o próximo passo sem perder o contexto do lead.
-        </p>
-        <div className="mt-6">
-          <LeadCallGuide lead={lead} profile={profile} />
-        </div>
-      </Card>
+      <LeadDetailExperience
+        lead={lead}
+        profile={profile}
+        interactions={interactions}
+        nextAction={nextAction}
+      />
 
       <Card className="rounded-[1.75rem]">
         <h2 className="text-2xl font-bold tracking-tight">Editar lead</h2>
@@ -119,34 +42,21 @@ export default async function LeadDetailPage({
       </Card>
 
       <Card className="rounded-[1.75rem]">
-        <h2 className="text-2xl font-bold tracking-tight">Histórico de interações</h2>
-        <div className="mt-5 space-y-3">
-          {interactions.map((interaction) => (
-            <div key={interaction.id} className="rounded-[1.2rem] border border-border bg-surface-low p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="font-medium">{interaction.type}</p>
-                <Badge>{interaction.status}</Badge>
-              </div>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{interaction.message}</p>
-              <p className="mt-3 text-xs text-muted-foreground">{formatRelativeDate(interaction.created_at)}</p>
-            </div>
-          ))}
-          {interactions.length === 0 ? (
-            <p className="rounded-[1.2rem] bg-surface-low px-4 py-6 text-sm text-muted-foreground">
-              Ainda não há interações registradas para este lead.
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Ações rápidas</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Exclua o lead somente quando tiver certeza de que ele não deve mais permanecer na sua base.
             </p>
-          ) : null}
+          </div>
+          <form action={deleteLeadAction}>
+            <input type="hidden" name="leadId" value={lead.id} />
+            <Button type="submit" variant="danger">
+              Excluir lead
+            </Button>
+          </form>
         </div>
       </Card>
-    </div>
-  );
-}
-
-function Info({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div className="rounded-[1.25rem] border border-border bg-card p-4">
-      <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">{label}</p>
-      <p className="mt-2 text-sm font-medium">{value || "Não informado"}</p>
     </div>
   );
 }

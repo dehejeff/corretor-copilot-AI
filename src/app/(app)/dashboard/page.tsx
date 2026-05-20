@@ -45,26 +45,28 @@ export default async function DashboardPage() {
         </h1>
       </section>
 
-      <Card className="overflow-hidden rounded-[1.75rem] bg-[linear-gradient(135deg,#0f766e,#0b4f59)] text-white shadow-[var(--shadow)]">
+      <Card className="overflow-hidden rounded-[1.75rem] border-primary/20 bg-gradient-to-br from-primary via-[#10685f] to-[#0b4f59] text-white shadow-[var(--shadow)]">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white shadow-sm">
             <CalendarClock className="h-5 w-5" />
           </div>
-          <p className="text-sm font-semibold tracking-[0.18em] text-emerald-100 uppercase">
+          <p className="text-sm font-semibold tracking-[0.18em] text-emerald-50 uppercase">
             Bom trabalho, {profile.name?.split(" ")[0] || "corretor"}
           </p>
         </div>
 
         <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Priorize o que move venda agora.</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-50/85">
+            <h2 className="text-3xl font-bold tracking-tight text-white">
+              Priorize o que move venda agora.
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/88">
               Priorize os leads mais quentes, mantenha o follow-up vivo e use a IA para responder com mais consistência.
             </p>
           </div>
           <Link
             href="/tasks"
-            className="inline-flex items-center justify-center rounded-xl bg-white/12 px-4 py-3 text-sm font-semibold text-white"
+            className="inline-flex items-center justify-center rounded-xl bg-white/18 px-4 py-3 text-sm font-semibold text-white shadow-sm ring-1 ring-white/20"
           >
             Ver tarefas do dia
           </Link>
