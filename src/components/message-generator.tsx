@@ -13,12 +13,14 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
   const [messageType, setMessageType] = useState<MessageType>("primeiro_contato");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [helper, setHelper] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const handleGenerate = () => {
     startTransition(async () => {
       try {
         setError("");
+        setHelper("");
         const response = await fetch("/api/ai/message", {
           method: "POST",
           headers: {
@@ -30,13 +32,22 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
           }),
         });
 
-        const data = (await response.json()) as { message?: string; error?: string };
+        const data = (await response.json()) as {
+          message?: string;
+          error?: string;
+          provider?: "openai" | "fallback";
+          fallbackReason?: string | null;
+        };
 
         if (!response.ok) {
           throw new Error(data.error || "Falha ao gerar mensagem.");
         }
 
         setMessage(data.message || "");
+
+        if (data.provider === "fallback") {
+          setHelper("Mensagem gerada com modelo interno de fallback. A integração com IA pode estar sem saldo ou temporariamente indisponível.");
+        }
       } catch (err) {
         setError(getErrorMessage(err));
       }
@@ -74,6 +85,7 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
       />
 
       {error ? <p className="text-sm text-danger">{error}</p> : null}
+      {helper ? <p className="text-sm text-amber-700">{helper}</p> : null}
 
       <a
         href={buildWhatsappUrl(lead.phone, message)}

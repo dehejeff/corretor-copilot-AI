@@ -35,8 +35,14 @@ function buildFallbackMessage(lead: Lead, type: MessageType) {
 }
 
 export async function generateLeadMessage(lead: Lead, messageType: MessageType) {
+  const fallbackMessage = buildFallbackMessage(lead, messageType);
+
   if (!process.env.OPENAI_API_KEY) {
-    return buildFallbackMessage(lead, messageType);
+    return {
+      message: fallbackMessage,
+      provider: "fallback" as const,
+      fallbackReason: "missing_api_key",
+    };
   }
 
   const prompt = `
@@ -59,11 +65,26 @@ Temperatura: ${lead.temperature}
 Observações: ${lead.notes ?? "sem observações"}
 `.trim();
 
-  const response = await getOpenAIClient().responses.create({
-    model: "gpt-4.1-mini",
-    input: prompt,
-  });
+  try {
+    const response = await getOpenAIClient().responses.create({
+      model: "gpt-4.1-mini",
+      input: prompt,
+    });
 
-  const message = response.output_text.trim();
-  return message || buildFallbackMessage(lead, messageType);
+    const message = response.output_text.trim();
+
+    return {
+      message: message || fallbackMessage,
+      provider: message ? ("openai" as const) : ("fallback" as const),
+      fallbackReason: message ? null : "empty_response",
+    };
+  } catch (error) {
+    console.error("OpenAI generation failed, using fallback message.", error);
+
+    return {
+      message: fallbackMessage,
+      provider: "fallback" as const,
+      fallbackReason: "provider_error",
+    };
+  }
 }

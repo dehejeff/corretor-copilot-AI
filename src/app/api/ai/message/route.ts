@@ -15,17 +15,21 @@ export async function POST(request: Request) {
 
     const values = generateMessageSchema.parse(await request.json());
     const { lead } = await getLeadById(user.id, values.leadId);
-    const message = await generateLeadMessage(lead, values.messageType);
+    const result = await generateLeadMessage(lead, values.messageType);
 
     await recordInteraction({
       userId: user.id,
       leadId: lead.id,
       type: values.messageType,
-      message,
-      status: "gerada",
+      message: result.message,
+      status: result.provider === "openai" ? "gerada" : "gerada via fallback",
     });
 
-    return NextResponse.json({ message });
+    return NextResponse.json({
+      message: result.message,
+      provider: result.provider,
+      fallbackReason: result.fallbackReason,
+    });
   } catch (error) {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 400 });
   }
