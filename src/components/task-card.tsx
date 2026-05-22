@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageCircle, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, MessageCircle, MessageSquareText } from "lucide-react";
 import type { Task } from "@/lib/types";
 import { buildWhatsappUrl, formatRelativeDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -33,8 +33,9 @@ export function TaskCard({
       <div className="mt-4 flex flex-wrap gap-3">
         <Link
           href={`/leads/${task.lead_id}`}
-          className="rounded-2xl border border-border px-4 py-2.5 text-sm font-semibold"
+          className="inline-flex items-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-semibold"
         >
+          <MessageSquareText className="h-4 w-4 shrink-0" />
           Gerar mensagem
         </Link>
         <a
@@ -43,14 +44,14 @@ export function TaskCard({
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-2xl bg-accent px-4 py-2.5 text-sm font-semibold"
         >
-          <MessageCircle className="h-4 w-4" />
+          <MessageCircle className="h-4 w-4 shrink-0" />
           Abrir WhatsApp
         </a>
         <form action={action}>
           <input type="hidden" name="taskId" value={task.id} />
           <SubmitButton pendingText="Concluindo..." variant="secondary">
             <span className="inline-flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" />
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
               Marcar como feito
             </span>
           </SubmitButton>
