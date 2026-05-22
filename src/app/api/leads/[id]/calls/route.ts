@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { saveLeadCall } from "@/lib/calls";
 import { getLeadById } from "@/lib/leads";
@@ -28,6 +29,17 @@ export async function POST(
 
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (error instanceof ZodError) {
+      const callResultIssue = error.issues.find((issue) => issue.path.join(".") === "callResult");
+
+      if (callResultIssue) {
+        return NextResponse.json(
+          { error: "Selecione um resultado válido da ligação antes de salvar." },
+          { status: 400 },
+        );
+      }
+    }
+
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 400 });
   }
 }

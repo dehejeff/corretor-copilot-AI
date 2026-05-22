@@ -33,6 +33,8 @@ export async function saveLeadCall(params: {
       simulation_done: boolean;
       credit_approved: boolean;
       can_visit: boolean;
+      visit_date: string;
+      visit_type?: string;
       visit_best_slot: string;
       motivation: string;
       temperature?: string;
@@ -55,7 +57,10 @@ export async function saveLeadCall(params: {
     fgts: payload.updatedLeadFields.fgts,
     purchase_timeline: payload.updatedLeadFields.purchase_timeline || lead.purchase_timeline,
     credit_approved: payload.updatedLeadFields.credit_approved,
-    requested_visit: payload.updatedLeadFields.can_visit,
+    requested_visit:
+      payload.updatedLeadFields.can_visit || Boolean(payload.updatedLeadFields.visit_date),
+    visit_date: payload.updatedLeadFields.visit_date || lead.visit_date,
+    visit_type: payload.updatedLeadFields.visit_type || lead.visit_type,
     notes: [lead.notes, payload.callNotes, payload.internalNotes].filter(Boolean).join("\n\n"),
   };
 
@@ -79,6 +84,8 @@ export async function saveLeadCall(params: {
       purchase_timeline: mergedLead.purchase_timeline,
       credit_approved: mergedLead.credit_approved,
       requested_visit: mergedLead.requested_visit,
+      visit_date: mergedLead.visit_date ? new Date(mergedLead.visit_date).toISOString() : null,
+      visit_type: mergedLead.visit_type,
       notes: mergedLead.notes,
       status: nextStatus,
       score: scoring.score,

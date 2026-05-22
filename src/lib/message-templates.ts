@@ -12,27 +12,27 @@ const templateDictionary: TemplateDictionary = {
     {
       tone: "Mais consultivo",
       template:
-        "Olá, [Nome do lead]. Tudo bem?\nMe chamo [Nome do corretor], sou consultor imobiliário especializado na região de [Região]. Vi seu interesse em [Tipo de imóvel] na faixa de [Faixa de preço] e queria entender melhor o que você procura para te ajudar da forma mais assertiva possível.",
+        "Olá, [Nome do lead], tudo bem?\nMe chamo [Nome do corretor], sou consultor imobiliário especializado na região de [Região]. Vi seu interesse em [Tipo de imóvel] na faixa de [Faixa de preço]. Você pode me contar um pouco melhor o que faz mais sentido para você hoje?",
     },
     {
       tone: "Mais acolhedor",
       template:
-        "Oi, [Nome do lead]. Tudo certo?\nSou [Nome do corretor], consultor imobiliário aqui da região de [Região]. Recebi seu contato sobre imóveis em [Bairro] e achei melhor falar com você diretamente para entender o que faria sentido para o seu momento.",
+        "Oi, [Nome do lead], tudo certo?\nSou [Nome do corretor], consultor imobiliário aqui da região de [Região]. Recebi seu contato sobre imóveis em [Bairro] e queria entender: você está buscando algo para morar, investir ou ainda está avaliando possibilidades?",
     },
     {
       tone: "Mais direto",
       template:
-        "Boa tarde, [Nome do lead].\nAqui é [Nome do corretor], consultor especializado em imóveis na região de [Região]. Vi seu interesse em [Tipo de imóvel] e queria saber se você ainda está buscando opções nessa faixa.",
+        "Boa tarde, [Nome do lead].\nAqui é [Nome do corretor], consultor especializado em imóveis na região de [Região]. Você ainda está buscando [Tipo de imóvel] nessa faixa de valor?",
     },
     {
       tone: "Mais comercial",
       template:
-        "Olá, [Nome do lead].\nSou [Nome do corretor], consultor imobiliário em [Região]. Entraram algumas oportunidades interessantes de [Tipo de imóvel] em [Bairro] e acredito que uma delas pode combinar com o que você procura.",
+        "Olá, [Nome do lead].\nSou [Nome do corretor], consultor imobiliário em [Região]. Entraram algumas oportunidades interessantes de [Tipo de imóvel] em [Bairro]. Quer que eu te mostre opções que combinem com o que você procura?",
     },
     {
       tone: "Mais objetivo",
       template:
-        "Oi, [Nome do lead].\nMeu nome é [Nome do corretor] e trabalho com imóveis na região de [Região]. Vi seu interesse e queria entender melhor o perfil do imóvel que você busca para te enviar opções mais alinhadas.",
+        "Oi, [Nome do lead].\nMeu nome é [Nome do corretor] e trabalho com imóveis na região de [Região]. Posso te fazer algumas perguntas rápidas para entender o perfil do imóvel que você busca e te enviar opções mais alinhadas?",
     },
   ],
   followup_d1: [
@@ -145,27 +145,42 @@ const templateDictionary: TemplateDictionary = {
   ],
   convite_visita: [
     {
-      tone: "Mais consultivo",
+      tone: "Escritório · Mais consultivo",
+      template:
+        "Olá, [Nome do lead]. Acho que uma visita ao escritório pode ser útil para alinharmos seu momento, financiamento e próximos passos com calma. Quer agendar esse encontro?",
+    },
+    {
+      tone: "Escritório · Mais acolhedor",
+      template:
+        "Oi, [Nome do lead]. Se fizer sentido para você, podemos marcar uma visita ao escritório para conversar com tranquilidade sobre opções, processo e próximos passos.",
+    },
+    {
+      tone: "Escritório · Mais objetivo",
+      template:
+        "Boa tarde, [Nome do lead]. Faz sentido agendarmos uma visita ao escritório para alinhar perfil, valores e estratégia da sua compra?",
+    },
+    {
+      tone: "Empreendimento · Mais consultivo",
       template:
         "Olá, [Nome do lead]. Acho que vale a pena você conhecer este imóvel pessoalmente. Quer agendar uma visita?",
     },
     {
-      tone: "Mais acolhedor",
+      tone: "Empreendimento · Mais acolhedor",
       template:
         "Oi, [Nome do lead]. Tenho um horário livre esta semana caso queira visitar o imóvel com calma.",
     },
     {
-      tone: "Mais direto",
+      tone: "Empreendimento · Mais direto",
       template:
         "Boa tarde, [Nome do lead]. Podemos marcar uma visita para você avaliar melhor o imóvel.",
     },
     {
-      tone: "Mais comercial",
+      tone: "Empreendimento · Mais comercial",
       template:
         "Olá, [Nome do lead]. Este imóvel tem tido bastante procura e acredito que uma visita faria sentido antes de qualquer decisão.",
     },
     {
-      tone: "Mais objetivo",
+      tone: "Empreendimento · Mais objetivo",
       template:
         "Oi, [Nome do lead]. Qual é o melhor dia para você visitar o imóvel?",
     },
@@ -253,27 +268,37 @@ const templateDictionary: TemplateDictionary = {
   ],
   pos_visita: [
     {
-      tone: "Mais consultivo",
+      tone: "Escritório · Mais consultivo",
+      template:
+        "Olá, [Nome do lead]. Queria entender como você se sentiu depois da nossa reunião no escritório e se faz sentido avançarmos para o próximo passo.",
+    },
+    {
+      tone: "Escritório · Mais objetivo",
+      template:
+        "Oi, [Nome do lead]. Depois da nossa visita ao escritório, ficou alguma dúvida sobre processo, documentação ou financiamento que eu possa te ajudar a resolver?",
+    },
+    {
+      tone: "Empreendimento · Mais consultivo",
       template:
         "Olá, [Nome do lead]. Gostaria de entender sua percepção sobre o imóvel após a visita.",
     },
     {
-      tone: "Mais acolhedor",
+      tone: "Empreendimento · Mais acolhedor",
       template:
         "Oi, [Nome do lead]. Foi um prazer te acompanhar hoje. O que achou do imóvel?",
     },
     {
-      tone: "Mais direto",
+      tone: "Empreendimento · Mais direto",
       template:
         "Boa tarde, [Nome do lead]. O imóvel ficou dentro do que você imaginava?",
     },
     {
-      tone: "Mais comercial",
+      tone: "Empreendimento · Mais comercial",
       template:
         "Olá, [Nome do lead]. Achei que o imóvel combinou bastante com o perfil que você comentou.",
     },
     {
-      tone: "Mais objetivo",
+      tone: "Empreendimento · Mais objetivo",
       template:
         "Me fala sinceramente o que gostou e o que não gostou para eu conseguir te direcionar melhor.",
     },
@@ -314,6 +339,7 @@ function getFirstName(value?: string | null) {
 function buildTemplateContext(lead: Lead, profile: Profile) {
   const region = lead.neighborhood || profile.company_name || "sua região";
   const neighborhood = lead.neighborhood || region;
+  const visitType = lead.visit_type === "Escritório" ? "visita ao escritório" : "visita ao empreendimento";
 
   return {
     "[Nome do lead]": getFirstName(lead.name),
@@ -322,6 +348,7 @@ function buildTemplateContext(lead: Lead, profile: Profile) {
     "[Bairro]": neighborhood,
     "[Tipo de imóvel]": lead.property_type || "imóvel",
     "[Faixa de preço]": lead.price_range || "faixa alinhada ao seu perfil",
+    "[Tipo de visita]": visitType,
   };
 }
 

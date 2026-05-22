@@ -11,10 +11,12 @@ import type {
   Lead,
   Profile,
 } from "@/lib/types";
+import { visitTypeLabels } from "@/lib/constants";
 import {
   buildWhatsappUrl,
   formatCurrency,
   formatDate,
+  formatDateTime,
   formatRelativeDate,
 } from "@/lib/utils";
 import { ConversationPanel } from "@/components/conversation-panel";
@@ -22,6 +24,86 @@ import { MessageGenerator } from "@/components/message-generator";
 import { LeadCallGuide } from "@/components/lead-call-guide";
 
 type TabId = "dados" | "historico" | "conversa" | "ia";
+
+function getLeadStageMeta(status: string) {
+  if (status === "Novo lead" || status === "Primeiro contato enviado") {
+    return {
+      label: "Entrada do lead",
+      tone: "text-sky-700 bg-sky-100",
+      description: "Lead recém-chegado ou em primeiro toque comercial.",
+    };
+  }
+
+  if (status === "Retornar contato" || status === "Respondeu" || status === "Qualificado") {
+    return {
+      label: "Qualificação",
+      tone: "text-amber-700 bg-amber-100",
+      description: "Momento de retomar a conversa, entender contexto e avançar a intenção.",
+    };
+  }
+
+  if (status === "Visita agendada") {
+    return {
+      label: "Visita",
+      tone: "text-violet-700 bg-violet-100",
+      description: "O lead já entrou na etapa presencial e precisa de alinhamento fino.",
+    };
+  }
+
+  if (status === "Coletar documentação") {
+    return {
+      label: "Documentação",
+      tone: "text-orange-700 bg-orange-100",
+      description: "Fase de reunir documentos e organizar a pasta para análise.",
+    };
+  }
+
+  if (status === "Documentação em análise") {
+    return {
+      label: "Análise",
+      tone: "text-orange-700 bg-orange-100",
+      description: "Documentos enviados. Agora o foco é acompanhar o retorno da análise.",
+    };
+  }
+
+  if (status === "Análise aprovada") {
+    return {
+      label: "Resultado aprovado",
+      tone: "text-emerald-700 bg-emerald-100",
+      description: "Análise concluída com aprovação. Próximo passo é conduzir o fechamento.",
+    };
+  }
+
+  if (status === "Análise condicionada") {
+    return {
+      label: "Resultado condicionado",
+      tone: "text-yellow-800 bg-yellow-100",
+      description: "A análise retornou com pendências. Vale orientar o cliente e complementar a pasta.",
+    };
+  }
+
+  if (status === "Análise reprovada") {
+    return {
+      label: "Resultado reprovado",
+      tone: "text-rose-700 bg-rose-100",
+      description: "A análise não aprovou o caso atual. É importante registrar o motivo e avaliar alternativas.",
+    };
+  }
+
+  if (status === "Fechado") {
+    return {
+      label: "Fechamento",
+      tone: "text-emerald-700 bg-emerald-100",
+      description: "Negócio concluído.",
+    };
+  }
+
+  return {
+    label: "Pipeline",
+    tone: "text-muted-foreground bg-muted",
+    description: "Acompanhe a próxima ação recomendada para seguir com este lead.",
+  };
+}
 
 export function LeadDetailExperience({
   lead,
@@ -50,6 +132,7 @@ export function LeadDetailExperience({
     const circumference = 2 * Math.PI * 28;
     return circumference - (normalized / 100) * circumference;
   }, [lead.score]);
+  const stageMeta = getLeadStageMeta(lead.status);
 
   return (
     <div className="space-y-4">
@@ -140,6 +223,33 @@ export function LeadDetailExperience({
         </p>
       </section>
 
+      <section className="rounded-xl border border-border bg-white p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+              Etapa Atual
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${stageMeta.tone}`}>
+                {stageMeta.label}
+              </span>
+              <span className="text-sm font-semibold text-foreground">{lead.status}</span>
+            </div>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
+              {stageMeta.description}
+            </p>
+          </div>
+          <div className="grid gap-2 sm:min-w-[240px]">
+            <MiniInfo
+              label="Tipo de visita"
+              value={lead.visit_type ? visitTypeLabels[lead.visit_type as keyof typeof visitTypeLabels] : "Não informado"}
+            />
+            <MiniInfo label="Visita" value={formatDateTime(lead.visit_date)} />
+            <MiniInfo label="Retorno" value={formatDateTime(lead.next_followup_at)} />
+          </div>
+        </div>
+      </section>
+
       <div className="scrollbar-hide flex overflow-x-auto border-b border-border">
         <TabButton
           active={activeTab === "dados"}
@@ -195,6 +305,12 @@ export function LeadDetailExperience({
                     label="Prazo previsto"
                     value={formatDate(lead.purchase_timeline)}
                   />
+                  <Row
+                    label="Tipo de visita"
+                    value={lead.visit_type ? visitTypeLabels[lead.visit_type as keyof typeof visitTypeLabels] : "Não informado"}
+                  />
+                  <Row label="Data da visita" value={formatDateTime(lead.visit_date)} />
+                  <Row label="Lembrete de retorno" value={formatDateTime(lead.next_followup_at)} />
                   <Row label="Origem" value={String(lead.source)} />
                   <Row label="Status atual" value={String(lead.status)} />
                 </div>
@@ -345,6 +461,17 @@ function Row({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between gap-4">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm font-bold text-foreground">{value}</span>
+    </div>
+  );
+}
+
+function MiniInfo({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-surface-low px-3 py-2">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-semibold text-foreground">{value}</p>
     </div>
   );
 }

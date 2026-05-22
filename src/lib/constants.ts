@@ -16,11 +16,15 @@ export const leadSources = [
 export const leadStatuses = [
   "Novo lead",
   "Primeiro contato enviado",
+  "Retornar contato",
   "Respondeu",
   "Qualificado",
   "Visita agendada",
-  "Em negociação",
-  "Proposta enviada",
+  "Coletar documentação",
+  "Documentação em análise",
+  "Análise aprovada",
+  "Análise condicionada",
+  "Análise reprovada",
   "Fechado",
   "Perdido",
   "Nutrição",
@@ -29,14 +33,26 @@ export const leadStatuses = [
 export const kanbanStatuses = [
   "Novo lead",
   "Primeiro contato enviado",
+  "Retornar contato",
   "Qualificado",
   "Visita agendada",
-  "Em negociação",
+  "Coletar documentação",
+  "Documentação em análise",
+  "Análise aprovada",
+  "Análise condicionada",
+  "Análise reprovada",
   "Fechado",
   "Perdido",
 ] as const;
 
 export const leadTemperatures = ["Quente", "Morno", "Frio"] as const;
+
+export const visitTypes = ["Escritório", "Empreendimento"] as const;
+
+export const visitTypeLabels = {
+  Escritório: "Visita ao escritório",
+  Empreendimento: "Visita ao empreendimento",
+} as const;
 
 export const messageTypes = [
   "primeiro_contato",

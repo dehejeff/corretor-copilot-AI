@@ -20,9 +20,10 @@ export async function PATCH(
     const values = updateLeadStatusSchema.parse({
       leadId: id,
       status: body.status,
+      visit_type: body.visit_type,
     });
 
-    await updateLeadStatus(user.id, values.leadId, values.status);
+    await updateLeadStatus(user.id, values.leadId, values.status, values.visit_type);
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 400 });

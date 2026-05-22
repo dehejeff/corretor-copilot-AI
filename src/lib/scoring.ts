@@ -49,6 +49,26 @@ export function getRecommendedNextAction(lead: Partial<Lead>) {
     return "Confirme os detalhes da visita e envie um lembrete no WhatsApp.";
   }
 
+  if (lead.status === "Coletar documentação") {
+    return "Solicite os documentos pendentes e organize a pasta para envio à análise.";
+  }
+
+  if (lead.status === "Documentação em análise") {
+    return "Acompanhe a análise de crédito e prepare o cliente para aprovado, condicionado ou reprovado.";
+  }
+
+  if (lead.status === "Análise condicionada") {
+    return "Explique as pendências, colete os complementos e retorne a documentação para nova validação.";
+  }
+
+  if (lead.status === "Análise aprovada") {
+    return "Comunique a aprovação e avance com os próximos passos comerciais e contratuais.";
+  }
+
+  if (lead.status === "Análise reprovada") {
+    return "Reposicione o lead com cuidado, entenda alternativas e registre o motivo da reprovação.";
+  }
+
   if (lead.temperature === "Quente") {
     return "Priorize um contato consultivo agora e conduza para visita ou proposta.";
   }

@@ -10,10 +10,12 @@ import {
   getCallSuggestionFallback,
   leadMotivationOptions,
   nextActionOptions,
+  normalizeCallResult,
   type CallStepId,
 } from "@/lib/call-guide-content";
+import { visitTypeLabels, visitTypes } from "@/lib/constants";
 import { replaceCallPlaceholders } from "@/lib/call-guide-utils";
-import type { Lead, LeadStatus, LeadTemperature, Profile } from "@/lib/types";
+import type { Lead, LeadStatus, LeadTemperature, Profile, VisitType } from "@/lib/types";
 import { normalizePhone } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +54,8 @@ type CallGuideState = {
     simulation_done: boolean;
     credit_approved: boolean;
     can_visit: boolean;
+    visit_date: string;
+    visit_type: VisitType | "";
     visit_best_slot: string;
     motivation: string;
     temperature: LeadTemperature | "";
@@ -86,6 +90,8 @@ const initialState: CallGuideState = {
     simulation_done: false,
     credit_approved: false,
     can_visit: false,
+    visit_date: "",
+    visit_type: "",
     visit_best_slot: "",
     motivation: "",
     temperature: "",
@@ -93,8 +99,14 @@ const initialState: CallGuideState = {
   },
 };
 
+const CALL_GUIDE_STORAGE_VERSION = 3;
+
+type StoredCallGuideDraft = CallGuideState & {
+  version?: number;
+};
+
 export function LeadCallGuide({ lead, profile }: { lead: Lead; profile: Profile }) {
-  const storageKey = `call-guide:${lead.id}`;
+  const storageKey = `call-guide:v${CALL_GUIDE_STORAGE_VERSION}:${lead.id}`;
   const [state, setState] = useState<CallGuideState>(initialState);
   const [saveMessage, setSaveMessage] = useState("");
   const [error, setError] = useState("");
@@ -102,11 +114,43 @@ export function LeadCallGuide({ lead, profile }: { lead: Lead; profile: Profile 
   const [isGeneratingSuggestion, startGeneratingSuggestion] = useTransition();
 
   useEffect(() => {
+    const legacyStorageKeys = [
+      `call-guide:${lead.id}`,
+      `call-guide:v1:${lead.id}`,
+      `call-guide:v2:${lead.id}`,
+    ];
+
+    for (const legacyKey of legacyStorageKeys) {
+      localStorage.removeItem(legacyKey);
+    }
+
     const rawDraft = localStorage.getItem(storageKey);
 
     if (rawDraft) {
       try {
-        setState(JSON.parse(rawDraft) as CallGuideState);
+        const draft = JSON.parse(rawDraft) as StoredCallGuideDraft;
+        const normalizedCallResult = normalizeCallResult(draft.callResult);
+        const sanitizedDraft: CallGuideState = {
+          ...initialState,
+          ...draft,
+          callResult: normalizedCallResult,
+          updatedLeadFields: {
+            ...initialState.updatedLeadFields,
+            ...draft.updatedLeadFields,
+            status: normalizedCallResult
+              ? (getCallStatusFromResult(normalizedCallResult) as LeadStatus)
+              : draft.updatedLeadFields?.status || "",
+          },
+        };
+
+        setState(sanitizedDraft);
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            ...sanitizedDraft,
+            version: CALL_GUIDE_STORAGE_VERSION,
+          }),
+        );
         return;
       } catch {
         localStorage.removeItem(storageKey);
@@ -127,6 +171,8 @@ export function LeadCallGuide({ lead, profile }: { lead: Lead; profile: Profile 
         purchase_timeline: lead.purchase_timeline || "",
         credit_approved: lead.credit_approved,
         can_visit: lead.requested_visit,
+        visit_date: lead.visit_date || "",
+        visit_type: (lead.visit_type as VisitType) || "",
         temperature: lead.temperature as LeadTemperature,
         status: lead.status as LeadStatus,
       },
@@ -134,7 +180,13 @@ export function LeadCallGuide({ lead, profile }: { lead: Lead; profile: Profile 
   }, [lead, storageKey]);
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(state));
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        ...state,
+        version: CALL_GUIDE_STORAGE_VERSION,
+      }),
+    );
   }, [state, storageKey]);
 
   const currentStepContent = callGuideSteps[state.currentStep];
@@ -506,6 +558,28 @@ export function LeadCallGuide({ lead, profile }: { lead: Lead; profile: Profile 
                       value={state.updatedLeadFields.purchase_timeline}
                       onChange={(event) => updateLeadField("purchase_timeline", event.target.value)}
                     />
+                  </Field>
+                  <Field label="Data da visita">
+                    <Input
+                      type="datetime-local"
+                      value={state.updatedLeadFields.visit_date}
+                      onChange={(event) => updateLeadField("visit_date", event.target.value)}
+                    />
+                  </Field>
+                  <Field label="Tipo de visita">
+                    <Select
+                      value={state.updatedLeadFields.visit_type}
+                      onChange={(event) =>
+                        updateLeadField("visit_type", event.target.value as VisitType | "")
+                      }
+                    >
+                      <option value="">Selecione</option>
+                      {visitTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {visitTypeLabels[type]}
+                        </option>
+                      ))}
+                    </Select>
                   </Field>
                   <Field label="Melhor dia/horário para visita">
                     <Input

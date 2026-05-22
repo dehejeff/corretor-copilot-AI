@@ -45,7 +45,7 @@ export const callGuideSteps = {
     questions: [
       "Você já conhece bem essa região ou ainda está pesquisando?",
       "Hoje você está procurando mais para morar ou investir?",
-      "Você já visitou algum imóvel recentemente?",
+      "Você já visitou algum imóvel ou já foi até algum escritório para entender melhor o processo?",
       "O que mais tem pesado na sua decisão hoje?",
     ],
   },
@@ -84,11 +84,16 @@ export const callGuideSteps = {
     objective: "Conduzir para uma ação concreta.",
     scripts: [
       "Pelo que você comentou, acredito que consigo te direcionar para opções mais alinhadas e evitar que você perca tempo olhando imóvel fora do perfil.",
-      "Tem um imóvel que acredito que pode fazer bastante sentido para você. Faz sentido agendarmos uma visita sem compromisso?",
+      "Faz mais sentido para você agendarmos uma visita ao escritório para alinharmos financiamento, documentação e estratégia da compra?",
+      "Tem um imóvel que acredito que pode fazer bastante sentido para você. Faz sentido agendarmos uma visita ao empreendimento sem compromisso?",
       "Vou separar algumas opções mais alinhadas e te envio pelo WhatsApp.",
-      "Qual melhor dia para você visitar com calma?",
+      "Qual melhor dia para você ir ao escritório ou visitar o empreendimento com calma?",
     ],
-    questions: [],
+    questions: [
+      "Para o seu momento, faz mais sentido uma visita ao escritório ou ao empreendimento?",
+      "Se formos ao escritório, você prefere focar em financiamento, documentação ou definição do imóvel ideal?",
+      "Se formos ao empreendimento, qual unidade ou região faz mais sentido visitar primeiro?",
+    ],
   },
   resumo: {
     title: "Step 7: Resumo e salvar",
@@ -152,13 +157,15 @@ export const callObjectionCards = [
 
 export const nextActionOptions = [
   "Enviar opções por WhatsApp",
-  "Agendar visita",
+  "Agendar visita ao escritório",
+  "Agendar visita ao empreendimento",
   "Fazer simulação de financiamento",
-  "Retornar em outro horário",
+  "Retornar comunicação com o lead",
   "Nutrir lead",
   "Marcar como sem interesse",
   "Atualizar dados do lead",
-  "Encaminhar documentação",
+  "Coletar documentação",
+  "Enviar documentação para análise",
   "Criar tarefa de follow-up",
 ] as const;
 
@@ -174,18 +181,29 @@ export const callResultOptions = [
   "Perdido",
 ] as const;
 
+export type CallResultOption = (typeof callResultOptions)[number];
+
+export function isCallResultOption(value: string): value is CallResultOption {
+  return (callResultOptions as readonly string[]).includes(value);
+}
+
+export function normalizeCallResult(value: string | null | undefined) {
+  const normalized = value?.trim() ?? "";
+  return isCallResultOption(normalized) ? normalized : "";
+}
+
 export function getCallStatusFromResult(result: string) {
   switch (result) {
     case "Visita agendada":
       return "Visita agendada";
     case "Negociação iniciada":
-      return "Em negociação";
+      return "Coletar documentação";
     case "Lead qualificado":
       return "Qualificado";
     case "Atendeu e está pesquisando":
       return "Respondeu";
     case "Atendeu e pediu retorno":
-      return "Primeiro contato enviado";
+      return "Retornar contato";
     case "Atendeu, mas sem interesse":
     case "Perdido":
       return "Perdido";

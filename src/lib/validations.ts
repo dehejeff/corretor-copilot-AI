@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { leadSources, leadStatuses, messageTypes } from "@/lib/constants";
-import { callResultOptions } from "@/lib/call-guide-content";
+import { leadSources, leadStatuses, messageTypes, visitTypes } from "@/lib/constants";
+import { callResultOptions, isCallResultOption } from "@/lib/call-guide-content";
 
 const booleanFromForm = z
   .union([z.boolean(), z.string(), z.number()])
@@ -32,7 +32,10 @@ export const leadSchema = z.object({
   fgts: booleanFromForm.default(false),
   purchase_timeline: z.string().optional(),
   requested_visit: booleanFromForm.default(false),
+  visit_date: z.string().optional(),
+  visit_type: z.enum(visitTypes).optional().or(z.literal("")),
   researching_only: booleanFromForm.default(false),
+  next_followup_at: z.string().optional(),
   notes: z.string().optional(),
   status: z.enum(leadStatuses).default("Novo lead"),
 });
@@ -40,6 +43,7 @@ export const leadSchema = z.object({
 export const updateLeadStatusSchema = z.object({
   leadId: z.uuid(),
   status: z.enum(leadStatuses),
+  visit_type: z.enum(visitTypes).optional().or(z.literal("")),
 });
 
 export const completeTaskSchema = z.object({
@@ -79,7 +83,12 @@ export const saveCallSchema = z.object({
   selectedObjections: z.array(z.string()).default([]),
   nextAction: z.string().optional().default(""),
   nextFollowupAt: z.string().optional().default(""),
-  callResult: z.enum(callResultOptions),
+  callResult: z
+    .string()
+    .trim()
+    .refine((value) => isCallResultOption(value), {
+      message: `Selecione um resultado de ligação válido: ${callResultOptions.join(", ")}.`,
+    }),
   summary: z.string().optional().default(""),
   internalNotes: z.string().optional().default(""),
   suggestedPhrase: z.string().optional().default(""),
@@ -97,6 +106,8 @@ export const saveCallSchema = z.object({
     simulation_done: z.boolean().default(false),
     credit_approved: z.boolean().default(false),
     can_visit: z.boolean().default(false),
+    visit_date: z.string().optional().default(""),
+    visit_type: z.enum(visitTypes).optional().or(z.literal("")),
     visit_best_slot: z.string().optional().default(""),
     motivation: z.string().optional().default(""),
     temperature: z.enum(["Quente", "Morno", "Frio"]).optional().or(z.literal("")),

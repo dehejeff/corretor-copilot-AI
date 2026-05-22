@@ -3,6 +3,10 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getRecommendedNextAction } from "@/lib/scoring";
 import type { Lead } from "@/lib/types";
 
+function getVisitDescription(lead: Lead) {
+  return lead.visit_type === "Escritório" ? "visita ao escritório" : "visita ao empreendimento";
+}
+
 type AutomationDefinition = {
   type: string;
   title: string;
@@ -32,6 +36,13 @@ const definitions: Record<string, AutomationDefinition> = {
     suggestedMessage: (lead) =>
       `Oi, ${lead.name.split(" ")[0]}! Algumas condicoes mudaram nos ultimos dias e talvez valha uma nova conversa para ver oportunidade.`,
   },
+  return_contact_reminder: {
+    type: "return_contact_reminder",
+    title: "Retornar comunicação com o lead",
+    description: (lead) => `Retomar a comunicação com ${lead.name} no horário planejado.`,
+    suggestedMessage: (lead) =>
+      `Oi, ${lead.name.split(" ")[0]}! Conforme combinamos, retomei nosso contato por aqui. Ainda faz sentido avançarmos na sua busca neste momento?`,
+  },
   hot_no_action: {
     type: "hot_no_action",
     title: "Lead quente sem ação",
@@ -55,17 +66,26 @@ const definitions: Record<string, AutomationDefinition> = {
   visit_reminder: {
     type: "visit_reminder",
     title: "Lembrete de visita",
-    description: (lead) => `Confirmar visita agendada com ${lead.name}.`,
+    description: (lead) => `Confirmar ${getVisitDescription(lead)} agendada com ${lead.name} e alinhar os últimos detalhes.`,
     suggestedMessage: (lead) =>
-      `Oi, ${lead.name.split(" ")[0]}! Confirmando nossa visita e me colocando à disposição para qualquer ajuste antes do horário combinado.`,
+      lead.visit_type === "Escritório"
+        ? `Oi, ${lead.name.split(" ")[0]}! Confirmando nossa visita ao escritório. Se quiser, já posso deixar alinhados os pontos de documentação, financiamento e próximos passos antes do horário combinado.`
+        : `Oi, ${lead.name.split(" ")[0]}! Confirmando nossa visita ao empreendimento e me colocando à disposição para qualquer ajuste antes do horário combinado.`,
   },
 };
 
 function selectAutomationType(lead: Lead) {
   const referenceDate = lead.last_inbound_at || lead.last_contact_at || lead.created_at;
   const days = differenceInCalendarDays(startOfDay(new Date()), startOfDay(new Date(referenceDate)));
+  const followupDue =
+    lead.next_followup_at && new Date(lead.next_followup_at) <= new Date();
+  const visitDaysAway = lead.visit_date
+    ? differenceInCalendarDays(startOfDay(new Date(lead.visit_date)), startOfDay(new Date()))
+    : null;
+  const visitDueSoon = visitDaysAway !== null && visitDaysAway >= 0 && visitDaysAway <= 1;
 
-  if (lead.status === "Visita agendada") return "visit_reminder";
+  if (followupDue) return "return_contact_reminder";
+  if (lead.status === "Visita agendada" && visitDueSoon) return "visit_reminder";
   if (lead.temperature === "Quente" && days >= 1) return "hot_no_action";
   if (days >= 7) return "followup_d7";
   if (days >= 3) return "followup_d3";
@@ -84,10 +104,14 @@ export async function runFollowupCron() {
     .in("status", [
       "Novo lead",
       "Primeiro contato enviado",
+      "Retornar contato",
       "Respondeu",
       "Qualificado",
       "Visita agendada",
-      "Em negociação",
+      "Coletar documentação",
+      "Documentação em análise",
+      "Análise condicionada",
+      "Análise aprovada",
       "Nutrição",
     ]);
 

@@ -1,7 +1,7 @@
 import { addDays, startOfDay } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { calculateLeadScore, getRecommendedNextAction } from "@/lib/scoring";
-import type { Interaction, Lead, LeadStatus, Task } from "@/lib/types";
+import type { Interaction, Lead, LeadStatus, Task, VisitType } from "@/lib/types";
 import { leadStatuses } from "@/lib/constants";
 
 type DashboardStats = {
@@ -16,7 +16,14 @@ type DashboardStats = {
   closed: number;
 };
 
-function buildLeadPayload(userId: string, values: Partial<Lead>) {
+function toNullableIsoString(value?: string | null) {
+  if (!value) return null;
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}
+
+function buildLeadPayload(userId: string, values: Partial<Lead>, mode: "create" | "update") {
   const scoring = calculateLeadScore(values);
 
   return {
@@ -35,6 +42,8 @@ function buildLeadPayload(userId: string, values: Partial<Lead>) {
     fgts: values.fgts ?? false,
     purchase_timeline: values.purchase_timeline || null,
     requested_visit: values.requested_visit ?? false,
+    visit_date: toNullableIsoString(values.visit_date),
+    visit_type: values.visit_type || null,
     researching_only: values.researching_only ?? false,
     contact_attempts: values.contact_attempts ?? 0,
     notes: values.notes || null,
@@ -43,7 +52,9 @@ function buildLeadPayload(userId: string, values: Partial<Lead>) {
     last_contact_at: values.last_contact_at || null,
     last_inbound_at: values.last_inbound_at || null,
     next_followup_at:
-      values.next_followup_at || addDays(new Date(), 1).toISOString(),
+      mode === "create"
+        ? toNullableIsoString(values.next_followup_at) || addDays(new Date(), 1).toISOString()
+        : toNullableIsoString(values.next_followup_at),
     score: scoring.score,
     temperature: scoring.temperature,
   };
@@ -51,7 +62,7 @@ function buildLeadPayload(userId: string, values: Partial<Lead>) {
 
 export async function createLead(userId: string, values: Partial<Lead>) {
   const supabase = await createClient();
-  const payload = buildLeadPayload(userId, values);
+  const payload = buildLeadPayload(userId, values, "create");
 
   const { data, error } = await supabase
     .from("leads")
@@ -68,7 +79,7 @@ export async function createLead(userId: string, values: Partial<Lead>) {
 
 export async function updateLead(userId: string, leadId: string, values: Partial<Lead>) {
   const supabase = await createClient();
-  const payload = buildLeadPayload(userId, values);
+  const payload = buildLeadPayload(userId, values, "update");
 
   const { data, error } = await supabase
     .from("leads")
@@ -143,7 +154,9 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
       return new Date(lead.last_contact_at) < addDays(new Date(), -3);
     }).length,
     visits: leads.filter((lead) => lead.status === "Visita agendada").length,
-    negotiation: leads.filter((lead) => lead.status === "Em negociação").length,
+    negotiation: leads.filter((lead) =>
+      ["Coletar documentação", "Documentação em análise", "Análise condicionada"].includes(lead.status),
+    ).length,
     closed: leads.filter((lead) => lead.status === "Fechado").length,
   };
 }
@@ -184,16 +197,35 @@ export async function markTaskAsDone(userId: string, taskId: string) {
   }
 }
 
-export async function updateLeadStatus(userId: string, leadId: string, status: LeadStatus) {
+export async function updateLeadStatus(
+  userId: string,
+  leadId: string,
+  status: LeadStatus,
+  visitType?: VisitType | "",
+) {
   if (!leadStatuses.includes(status)) {
     throw new Error("Status inválido.");
   }
 
   const supabase = await createClient();
+  const payload: {
+    status: LeadStatus;
+    updated_at: string;
+    visit_type?: VisitType | null;
+  } = {
+    status,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (status === "Visita agendada") {
+    payload.visit_type = visitType || null;
+  } else if (visitType !== undefined) {
+    payload.visit_type = null;
+  }
 
   const { error } = await supabase
     .from("leads")
-    .update({ status, updated_at: new Date().toISOString() })
+    .update(payload)
     .eq("id", leadId)
     .eq("user_id", userId);
 

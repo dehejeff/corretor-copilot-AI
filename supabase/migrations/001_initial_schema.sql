@@ -26,6 +26,8 @@ create table if not exists public.leads (
   fgts boolean not null default false,
   purchase_timeline text,
   requested_visit boolean not null default false,
+  visit_date timestamptz,
+  visit_type text,
   researching_only boolean not null default false,
   contact_attempts integer not null default 0,
   notes text,

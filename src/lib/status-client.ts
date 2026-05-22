@@ -1,10 +1,14 @@
-export async function updateLeadStatusApi(leadId: string, status: string) {
+export async function updateLeadStatusApi(
+  leadId: string,
+  status: string,
+  visitType?: "Escritório" | "Empreendimento" | "",
+) {
   const response = await fetch(`/api/leads/${leadId}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, visit_type: visitType }),
   });
 
   if (!response.ok) {

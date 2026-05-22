@@ -3,12 +3,14 @@ import type {
   leadStatuses,
   leadTemperatures,
   messageTypes,
+  visitTypes,
 } from "@/lib/constants";
 
 export type LeadSource = (typeof leadSources)[number];
 export type LeadStatus = (typeof leadStatuses)[number];
 export type LeadTemperature = (typeof leadTemperatures)[number];
 export type MessageType = (typeof messageTypes)[number];
+export type VisitType = (typeof visitTypes)[number];
 
 export interface MessageOption {
   id: string;
@@ -42,6 +44,8 @@ export interface Lead {
   fgts: boolean;
   purchase_timeline: string | null;
   requested_visit: boolean;
+  visit_date: string | null;
+  visit_type: VisitType | string | null;
   researching_only: boolean;
   contact_attempts: number;
   notes: string | null;

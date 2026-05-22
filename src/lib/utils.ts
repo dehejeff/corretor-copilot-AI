@@ -83,6 +83,30 @@ export function formatDate(value?: string | null) {
   return format(parsed, "dd/MM/yyyy");
 }
 
+export function formatDateTime(value?: string | null) {
+  if (!value) return "Não informado";
+
+  const parsed = parseISO(value);
+  if (!isValid(parsed)) return value;
+
+  return format(parsed, "dd/MM/yyyy 'às' HH:mm");
+}
+
+export function formatDateTimeLocalInput(value?: string | null) {
+  if (!value) return "";
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  const hours = String(parsed.getHours()).padStart(2, "0");
+  const minutes = String(parsed.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 export function buildWhatsappUrl(phone?: string | null, message?: string | null) {
   const normalized = normalizePhone(phone);
   const text = encodeURIComponent(message ?? "");

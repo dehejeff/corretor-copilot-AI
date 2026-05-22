@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { MessageCircle, PhoneCall } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { visitTypeLabels } from "@/lib/constants";
 import { getLeads } from "@/lib/leads";
-import { buildWhatsappUrl, formatPhone, formatRelativeDate } from "@/lib/utils";
+import { buildWhatsappUrl, formatDateTime, formatPhone, formatRelativeDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
@@ -73,6 +74,23 @@ export default async function LeadsPage() {
               <div>
                 <p className="text-xs tracking-[0.18em] text-muted-foreground uppercase">Pipeline</p>
                 <p className="mt-1 font-medium">{lead.property_type || "Não informado"}</p>
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+              <div className="rounded-[1rem] border border-border bg-white px-3 py-2">
+                <p className="text-xs tracking-[0.18em] text-muted-foreground uppercase">Tipo de visita</p>
+                <p className="mt-1 font-medium">
+                  {lead.visit_type ? visitTypeLabels[lead.visit_type as keyof typeof visitTypeLabels] : "Não informado"}
+                </p>
+              </div>
+              <div className="rounded-[1rem] border border-border bg-white px-3 py-2">
+                <p className="text-xs tracking-[0.18em] text-muted-foreground uppercase">Data da visita</p>
+                <p className="mt-1 font-medium">{formatDateTime(lead.visit_date)}</p>
+              </div>
+              <div className="rounded-[1rem] border border-border bg-white px-3 py-2 sm:col-span-2">
+                <p className="text-xs tracking-[0.18em] text-muted-foreground uppercase">Lembrete de retorno</p>
+                <p className="mt-1 font-medium">{formatDateTime(lead.next_followup_at)}</p>
               </div>
             </div>
 

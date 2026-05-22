@@ -1,5 +1,6 @@
-import { leadSources, leadStatuses } from "@/lib/constants";
+import { leadSources, leadStatuses, visitTypeLabels, visitTypes } from "@/lib/constants";
 import type { Lead } from "@/lib/types";
+import { formatDateTimeLocalInput } from "@/lib/utils";
 import { CurrencyInput, PhoneInput } from "@/components/formatted-fields";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -70,6 +71,30 @@ export function LeadForm({
             name="purchase_timeline"
             type="date"
             defaultValue={initialLead?.purchase_timeline ?? ""}
+          />
+        </Field>
+        <Field label="Data da visita">
+          <Input
+            name="visit_date"
+            type="datetime-local"
+            defaultValue={formatDateTimeLocalInput(initialLead?.visit_date)}
+          />
+        </Field>
+        <Field label="Tipo de visita">
+          <Select name="visit_type" defaultValue={initialLead?.visit_type ?? ""}>
+            <option value="">Selecione</option>
+            {visitTypes.map((type) => (
+              <option key={type} value={type}>
+                {visitTypeLabels[type]}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="Lembrete de retorno">
+          <Input
+            name="next_followup_at"
+            type="datetime-local"
+            defaultValue={formatDateTimeLocalInput(initialLead?.next_followup_at)}
           />
         </Field>
         <Field label="Status">
