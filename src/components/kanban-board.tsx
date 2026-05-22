@@ -117,6 +117,7 @@ export function KanbanBoard({ leads }: { leads: Lead[] }) {
   const [boardLeads, setBoardLeads] = useState(leads);
   const [draggedLeadId, setDraggedLeadId] = useState<string | null>(null);
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
+  const [workflowNotice, setWorkflowNotice] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -132,6 +133,7 @@ export function KanbanBoard({ leads }: { leads: Lead[] }) {
     const previousLeads = boardLeads;
     setHoveredStatus(null);
     setDraggedLeadId(null);
+    setWorkflowNotice(null);
 
     setBoardLeads((current) =>
       current.map((lead) =>
@@ -147,7 +149,19 @@ export function KanbanBoard({ leads }: { leads: Lead[] }) {
 
     startTransition(async () => {
       try {
-        await updateLeadStatusApi(leadId, column.status, column.visitType);
+        const result = await updateLeadStatusApi(leadId, column.status, column.visitType);
+        setBoardLeads((current) =>
+          current.map((lead) =>
+            lead.id === leadId
+              ? {
+                  ...lead,
+                  status: result.status,
+                  visit_type: result.visit_type ?? null,
+                }
+              : lead,
+          ),
+        );
+        setWorkflowNotice(result.notice ?? null);
       } catch {
         setBoardLeads(previousLeads);
       }
@@ -156,6 +170,12 @@ export function KanbanBoard({ leads }: { leads: Lead[] }) {
 
   return (
     <div className="space-y-4">
+      {workflowNotice ? (
+        <div className="rounded-[1.25rem] border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+          {workflowNotice}
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-muted-foreground">
           No celular, acompanhe as etapas em blocos verticais. Em telas maiores, arraste os cards entre as colunas.

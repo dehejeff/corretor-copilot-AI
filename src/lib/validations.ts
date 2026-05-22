@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { leadSources, leadStatuses, messageTypes, visitTypes } from "@/lib/constants";
+import {
+  analysisEligibilityOptions,
+  leadSources,
+  leadStatuses,
+  messageTypes,
+  visitTypes,
+} from "@/lib/constants";
 import { callResultOptions, isCallResultOption } from "@/lib/call-guide-content";
 
 const booleanFromForm = z
@@ -34,6 +40,13 @@ export const leadSchema = z.object({
   requested_visit: booleanFromForm.default(false),
   visit_date: z.string().optional(),
   visit_type: z.enum(visitTypes).optional().or(z.literal("")),
+  analysis_returned_at: z.string().optional(),
+  analysis_eligibility: z.enum(analysisEligibilityOptions).optional().or(z.literal("")),
+  approved_financing_amount: z.preprocess(
+    (value) => (value === "" || value === null ? undefined : value),
+    z.coerce.number().min(0).optional().nullable(),
+  ),
+  analysis_notes: z.string().optional(),
   researching_only: booleanFromForm.default(false),
   next_followup_at: z.string().optional(),
   notes: z.string().optional(),

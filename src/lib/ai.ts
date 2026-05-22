@@ -1,4 +1,8 @@
 import OpenAI from "openai";
+import {
+  getDocumentationChecklistSummary,
+  getPendingDocumentationItems,
+} from "@/lib/documentation";
 import type { Lead, MessageOption, MessageType, Profile } from "@/lib/types";
 import { env } from "@/lib/env";
 import { buildMessageOptions } from "@/lib/message-templates";
@@ -30,6 +34,10 @@ export async function generateLeadMessage(
   messageType: MessageType,
 ) {
   const fallbackOptions = buildMessageOptions(lead, profile, messageType);
+  const documentationSummary = getDocumentationChecklistSummary(lead.documentation_checklist);
+  const pendingDocumentation = getPendingDocumentationItems(lead.documentation_checklist)
+    .map((item) => item.label)
+    .join(", ");
 
   if (!process.env.OPENAI_API_KEY) {
     return buildFallbackPayload(fallbackOptions, "missing_api_key");
@@ -52,6 +60,11 @@ FGTS: ${lead.fgts ? "sim" : "não"}
 Prazo de compra: ${lead.purchase_timeline ?? "não informado"}
 Status atual: ${lead.status}
 Temperatura: ${lead.temperature}
+Tipo de visita: ${lead.visit_type ?? "não informado"}
+Documentos recebidos: ${documentationSummary.received}
+Documentos pendentes: ${documentationSummary.pending}
+Documentos não aplicáveis: ${documentationSummary.ignored}
+Itens pendentes: ${pendingDocumentation || "nenhum"}
 Observações: ${lead.notes ?? "sem observações"}
 `.trim();
 

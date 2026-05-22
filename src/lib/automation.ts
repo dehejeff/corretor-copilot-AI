@@ -1,4 +1,9 @@
 import { addDays, differenceInCalendarDays, startOfDay } from "date-fns";
+import {
+  getDocumentationChecklistSummary,
+  getPendingDocumentationItems,
+  isDocumentationReadyForAnalysis,
+} from "@/lib/documentation";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getRecommendedNextAction } from "@/lib/scoring";
 import type { Lead } from "@/lib/types";
@@ -72,6 +77,41 @@ const definitions: Record<string, AutomationDefinition> = {
         ? `Oi, ${lead.name.split(" ")[0]}! Confirmando nossa visita ao escritório. Se quiser, já posso deixar alinhados os pontos de documentação, financiamento e próximos passos antes do horário combinado.`
         : `Oi, ${lead.name.split(" ")[0]}! Confirmando nossa visita ao empreendimento e me colocando à disposição para qualquer ajuste antes do horário combinado.`,
   },
+  documentation_pending: {
+    type: "documentation_pending",
+    title: "Cobrar documentação pendente",
+    description: (lead) => {
+      const pending = getPendingDocumentationItems(lead.documentation_checklist).map((item) => item.label);
+      return `Solicitar os documentos pendentes de ${lead.name}: ${pending.join(", ")}.`;
+    },
+    suggestedMessage: (lead) => {
+      const pending = getPendingDocumentationItems(lead.documentation_checklist).map((item) => item.label);
+      return `Oi, ${lead.name.split(" ")[0]}! Para avançarmos com sua análise, ainda preciso de alguns documentos: ${pending.join(", ")}. Se quiser, te explico cada item e o melhor jeito de me enviar.`;
+    },
+  },
+  documentation_ready: {
+    type: "documentation_ready",
+    title: "Subir pasta para a imobiliária",
+    description: (lead) => `Pasta de ${lead.name} está pronta para ser subida na imobiliária e aguardar o retorno da análise.`,
+    suggestedMessage: (lead) =>
+      `Oi, ${lead.name.split(" ")[0]}! Sua pasta está organizada e pronta para eu subir na imobiliária. Se estiver tudo certo para você, já posso encaminhar agora e acompanhar o retorno da análise.`,
+  },
+  conditioned_analysis_followup: {
+    type: "conditioned_analysis_followup",
+    title: "Resolver análise condicionada",
+    description: (lead) => {
+      const pending = getPendingDocumentationItems(lead.documentation_checklist).map((item) => item.label);
+      return pending.length
+        ? `A imobiliária condicionou a análise de ${lead.name}. Precisamos complementar: ${pending.join(", ")}.`
+        : `A imobiliária condicionou a análise de ${lead.name} e precisamos tratar isso com o cliente.`;
+    },
+    suggestedMessage: (lead) => {
+      const pending = getPendingDocumentationItems(lead.documentation_checklist).map((item) => item.label);
+      return pending.length
+        ? `Oi, ${lead.name.split(" ")[0]}! A imobiliária analisou sua pasta e precisamos complementar alguns pontos: ${pending.join(", ")}. Posso te orientar agora para reenviarmos tudo certinho.`
+        : `Oi, ${lead.name.split(" ")[0]}! A imobiliária voltou com condicionantes na sua análise e quero te explicar direitinho o que precisamos ajustar para seguir com segurança.`;
+    },
+  },
 };
 
 function selectAutomationType(lead: Lead) {
@@ -83,9 +123,17 @@ function selectAutomationType(lead: Lead) {
     ? differenceInCalendarDays(startOfDay(new Date(lead.visit_date)), startOfDay(new Date()))
     : null;
   const visitDueSoon = visitDaysAway !== null && visitDaysAway >= 0 && visitDaysAway <= 1;
+  const documentationSummary = getDocumentationChecklistSummary(lead.documentation_checklist);
 
   if (followupDue) return "return_contact_reminder";
   if (lead.status === "Visita agendada" && visitDueSoon) return "visit_reminder";
+  if (lead.status === "Coletar documentação" && documentationSummary.pending > 0) {
+    return "documentation_pending";
+  }
+  if (lead.status === "Coletar documentação" && isDocumentationReadyForAnalysis(lead.documentation_checklist)) {
+    return "documentation_ready";
+  }
+  if (lead.status === "Análise condicionada") return "conditioned_analysis_followup";
   if (lead.temperature === "Quente" && days >= 1) return "hot_no_action";
   if (days >= 7) return "followup_d7";
   if (days >= 3) return "followup_d3";

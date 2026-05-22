@@ -1,5 +1,10 @@
 import { addDays, startOfDay } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
+import {
+  getDocumentationChecklistSummary,
+  isDocumentationReadyForAnalysis,
+  normalizeDocumentationChecklist,
+} from "@/lib/documentation";
 import { calculateLeadScore, getRecommendedNextAction } from "@/lib/scoring";
 import type { Interaction, Lead, LeadStatus, Task, VisitType } from "@/lib/types";
 import { leadStatuses } from "@/lib/constants";
@@ -16,6 +21,53 @@ type DashboardStats = {
   closed: number;
 };
 
+type DashboardPriorityLead = {
+  lead: Lead;
+  helper: string;
+};
+
+export type DashboardPriorities = {
+  returnToday: DashboardPriorityLead[];
+  readyForAnalysis: DashboardPriorityLead[];
+  conditionedAnalysis: DashboardPriorityLead[];
+  visitsToday: DashboardPriorityLead[];
+};
+
+export type LeadWorkflowUpdateResult = {
+  lead: Lead;
+  workflowNotice: string | null;
+};
+
+const documentationPipelineStatuses = new Set<LeadStatus>([
+  "Coletar documentação",
+  "Documentação em análise",
+]);
+
+const analysisStatusMap: Record<string, LeadStatus> = {
+  Apto: "Análise aprovada",
+  Condicionado: "Análise condicionada",
+  "Nao apto": "Análise reprovada",
+};
+
+function buildWorkflowNotice(
+  status: LeadStatus,
+  reason: "visit" | "documentation_ready" | "documentation_pending" | "analysis",
+) {
+  if (reason === "visit") {
+    return `O sistema moveu o lead automaticamente para "${status}" porque a visita já foi registrada.`;
+  }
+
+  if (reason === "documentation_ready") {
+    return `O sistema moveu o lead automaticamente para "${status}" porque a pasta ficou pronta para subir na imobiliária.`;
+  }
+
+  if (reason === "documentation_pending") {
+    return `O sistema moveu o lead automaticamente para "${status}" porque ainda existem documentos pendentes no checklist.`;
+  }
+
+  return `O sistema moveu o lead automaticamente para "${status}" com base no retorno da análise da imobiliária.`;
+}
+
 function toNullableIsoString(value?: string | null) {
   if (!value) return null;
 
@@ -23,10 +75,72 @@ function toNullableIsoString(value?: string | null) {
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
 }
 
-function buildLeadPayload(userId: string, values: Partial<Lead>, mode: "create" | "update") {
-  const scoring = calculateLeadScore(values);
+function synchronizeLeadWorkflow(values: Partial<Lead>, currentLead?: Partial<Lead>) {
+  const merged = {
+    ...currentLead,
+    ...values,
+  };
+
+  let nextStatus = (merged.status as LeadStatus | undefined) ?? "Novo lead";
+  const updates: Partial<Lead> = {};
+  let workflowReason: "visit" | "documentation_ready" | "documentation_pending" | "analysis" | null = null;
+
+  const analysisStatus =
+    merged.analysis_eligibility && analysisStatusMap[String(merged.analysis_eligibility)];
+
+  if (analysisStatus) {
+    nextStatus = analysisStatus;
+    workflowReason = "analysis";
+
+    if (!merged.analysis_returned_at) {
+      updates.analysis_returned_at = new Date().toISOString();
+    }
+  } else {
+    const touchedVisitFields =
+      values.visit_date !== undefined || values.visit_type !== undefined;
+    const hasVisitInfo = Boolean(merged.visit_date || merged.visit_type);
+
+    if (
+      hasVisitInfo &&
+      touchedVisitFields &&
+      (values.status === undefined || values.status === "Visita agendada")
+    ) {
+      nextStatus = "Visita agendada";
+      workflowReason = "visit";
+    }
+
+    if (documentationPipelineStatuses.has(nextStatus)) {
+      const readyForAnalysis = isDocumentationReadyForAnalysis(merged.documentation_checklist);
+      nextStatus = readyForAnalysis ? "Documentação em análise" : "Coletar documentação";
+      workflowReason = readyForAnalysis ? "documentation_ready" : "documentation_pending";
+    }
+  }
+
+  if (nextStatus === "Visita agendada" && !merged.requested_visit) {
+    updates.requested_visit = true;
+  }
+
+  updates.status = nextStatus;
+  const previousStatus = currentLead?.status as LeadStatus | undefined;
+  const requestedStatus = values.status as LeadStatus | undefined;
+  const movedAutomatically =
+    requestedStatus !== undefined
+      ? requestedStatus !== nextStatus
+      : previousStatus !== undefined && previousStatus !== nextStatus;
 
   return {
+    values: {
+      ...values,
+      ...updates,
+    },
+    workflowNotice:
+      movedAutomatically && workflowReason ? buildWorkflowNotice(nextStatus, workflowReason) : null,
+  };
+}
+
+function buildLeadPayload(userId: string, values: Partial<Lead>, mode: "create" | "update") {
+  const scoring = calculateLeadScore(values);
+  const payload = {
     user_id: userId,
     name: values.name,
     phone: values.phone || null,
@@ -44,6 +158,10 @@ function buildLeadPayload(userId: string, values: Partial<Lead>, mode: "create" 
     requested_visit: values.requested_visit ?? false,
     visit_date: toNullableIsoString(values.visit_date),
     visit_type: values.visit_type || null,
+    analysis_returned_at: toNullableIsoString(values.analysis_returned_at),
+    analysis_eligibility: values.analysis_eligibility || null,
+    approved_financing_amount: values.approved_financing_amount ?? null,
+    analysis_notes: values.analysis_notes || null,
     researching_only: values.researching_only ?? false,
     contact_attempts: values.contact_attempts ?? 0,
     notes: values.notes || null,
@@ -58,11 +176,28 @@ function buildLeadPayload(userId: string, values: Partial<Lead>, mode: "create" 
     score: scoring.score,
     temperature: scoring.temperature,
   };
+
+  if (mode === "create") {
+    return {
+      ...payload,
+      documentation_checklist: normalizeDocumentationChecklist(values.documentation_checklist),
+    };
+  }
+
+  if (values.documentation_checklist !== undefined) {
+    return {
+      ...payload,
+      documentation_checklist: normalizeDocumentationChecklist(values.documentation_checklist),
+    };
+  }
+
+  return payload;
 }
 
 export async function createLead(userId: string, values: Partial<Lead>) {
   const supabase = await createClient();
-  const payload = buildLeadPayload(userId, values, "create");
+  const synchronizedValues = synchronizeLeadWorkflow(values);
+  const payload = buildLeadPayload(userId, synchronizedValues.values, "create");
 
   const { data, error } = await supabase
     .from("leads")
@@ -77,9 +212,25 @@ export async function createLead(userId: string, values: Partial<Lead>) {
   return data as Lead;
 }
 
-export async function updateLead(userId: string, leadId: string, values: Partial<Lead>) {
+export async function updateLead(
+  userId: string,
+  leadId: string,
+  values: Partial<Lead>,
+): Promise<LeadWorkflowUpdateResult> {
   const supabase = await createClient();
-  const payload = buildLeadPayload(userId, values, "update");
+  const { data: currentLead, error: currentLeadError } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", leadId)
+    .eq("user_id", userId)
+    .single();
+
+  if (currentLeadError) {
+    throw new Error(`Não foi possível carregar o lead para atualização: ${currentLeadError.message}`);
+  }
+
+  const synchronizedValues = synchronizeLeadWorkflow(values, currentLead as Lead);
+  const payload = buildLeadPayload(userId, synchronizedValues.values, "update");
 
   const { data, error } = await supabase
     .from("leads")
@@ -93,7 +244,10 @@ export async function updateLead(userId: string, leadId: string, values: Partial
     throw new Error(`Não foi possível atualizar o lead: ${error.message}`);
   }
 
-  return data as Lead;
+  return {
+    lead: data as Lead,
+    workflowNotice: synchronizedValues.workflowNotice,
+  };
 }
 
 export async function getLeads(userId: string) {
@@ -161,6 +315,64 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
   };
 }
 
+export async function getDashboardPriorities(userId: string): Promise<DashboardPriorities> {
+  const leads = await getLeads(userId);
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  const tomorrowStart = addDays(todayStart, 1);
+
+  return {
+    returnToday: leads
+      .filter((lead) => {
+        if (!lead.next_followup_at) return false;
+        const followup = new Date(lead.next_followup_at);
+        return followup >= todayStart && followup < tomorrowStart;
+      })
+      .sort((a, b) => new Date(a.next_followup_at!).getTime() - new Date(b.next_followup_at!).getTime())
+      .slice(0, 5)
+      .map((lead) => ({
+        lead,
+        helper: lead.next_followup_at || "",
+      })),
+    readyForAnalysis: leads
+      .filter(
+        (lead) =>
+          lead.status === "Coletar documentação" &&
+          isDocumentationReadyForAnalysis(lead.documentation_checklist),
+      )
+      .slice(0, 5)
+      .map((lead) => ({
+        lead,
+        helper: "Pasta pronta para subir na imobiliária",
+      })),
+    conditionedAnalysis: leads
+      .filter((lead) => lead.status === "Análise condicionada")
+      .slice(0, 5)
+      .map((lead) => {
+        const summary = getDocumentationChecklistSummary(lead.documentation_checklist);
+        return {
+          lead,
+          helper:
+            summary.pending > 0
+              ? `${summary.pending} pendência(s) para complementar`
+              : "Análise condicionada aguardando tratativa",
+        };
+      }),
+    visitsToday: leads
+      .filter((lead) => {
+        if (lead.status !== "Visita agendada" || !lead.visit_date) return false;
+        const visit = new Date(lead.visit_date);
+        return visit >= todayStart && visit < tomorrowStart;
+      })
+      .sort((a, b) => new Date(a.visit_date!).getTime() - new Date(b.visit_date!).getTime())
+      .slice(0, 5)
+      .map((lead) => ({
+        lead,
+        helper: lead.visit_date || "",
+      })),
+  };
+}
+
 export async function getTasksForToday(userId: string) {
   const supabase = await createClient();
   const endOfDay = addDays(startOfDay(new Date()), 1).toISOString();
@@ -202,36 +414,114 @@ export async function updateLeadStatus(
   leadId: string,
   status: LeadStatus,
   visitType?: VisitType | "",
-) {
+): Promise<LeadWorkflowUpdateResult> {
   if (!leadStatuses.includes(status)) {
     throw new Error("Status inválido.");
   }
 
   const supabase = await createClient();
+  const { data: currentLead, error: currentLeadError } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", leadId)
+    .eq("user_id", userId)
+    .single();
+
+  if (currentLeadError) {
+    throw new Error(`Não foi possível carregar o lead para atualizar o status: ${currentLeadError.message}`);
+  }
+
+  const synchronizedValues = synchronizeLeadWorkflow(
+    {
+      status,
+      visit_type: status === "Visita agendada" ? visitType || null : null,
+    },
+    currentLead as Lead,
+  );
+
   const payload: {
     status: LeadStatus;
     updated_at: string;
     visit_type?: VisitType | null;
+    requested_visit?: boolean;
   } = {
-    status,
+    status: synchronizedValues.values.status as LeadStatus,
     updated_at: new Date().toISOString(),
   };
 
   if (status === "Visita agendada") {
-    payload.visit_type = visitType || null;
+    payload.visit_type = synchronizedValues.values.visit_type as VisitType | null;
   } else if (visitType !== undefined) {
     payload.visit_type = null;
   }
 
-  const { error } = await supabase
+  if (synchronizedValues.values.requested_visit !== undefined) {
+    payload.requested_visit = synchronizedValues.values.requested_visit;
+  }
+
+  const { data, error } = await supabase
     .from("leads")
     .update(payload)
     .eq("id", leadId)
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .select("*")
+    .single();
 
   if (error) {
     throw new Error(`Não foi possível atualizar o status: ${error.message}`);
   }
+
+  return {
+    lead: data as Lead,
+    workflowNotice: synchronizedValues.workflowNotice,
+  };
+}
+
+export async function updateDocumentationChecklist(
+  userId: string,
+  leadId: string,
+  documentationChecklist: Lead["documentation_checklist"],
+): Promise<LeadWorkflowUpdateResult> {
+  const supabase = await createClient();
+  const { data: currentLead, error: currentLeadError } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", leadId)
+    .eq("user_id", userId)
+    .single();
+
+  if (currentLeadError) {
+    throw new Error(`Não foi possível carregar o lead para atualizar o checklist: ${currentLeadError.message}`);
+  }
+
+  const normalizedChecklist = normalizeDocumentationChecklist(documentationChecklist);
+  const synchronizedValues = synchronizeLeadWorkflow(
+    {
+      documentation_checklist: normalizedChecklist,
+    },
+    currentLead as Lead,
+  );
+
+  const { data, error } = await supabase
+    .from("leads")
+    .update({
+      documentation_checklist: normalizedChecklist,
+      status: synchronizedValues.values.status as LeadStatus,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", leadId)
+    .eq("user_id", userId)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(`Não foi possível atualizar o checklist de documentação: ${error.message}`);
+  }
+
+  return {
+    lead: data as Lead,
+    workflowNotice: synchronizedValues.workflowNotice,
+  };
 }
 
 export async function recordInteraction(input: {

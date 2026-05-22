@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { CheckCircle2, MessageSquareText, Sparkles } from "lucide-react";
+import { getDocumentationChecklistSummary } from "@/lib/documentation";
 import { messageTypeLabels, messageTypes } from "@/lib/constants";
 import { buildWhatsappUrl, getErrorMessage } from "@/lib/utils";
 import type { Lead, MessageOption, MessageType } from "@/lib/types";
@@ -18,6 +19,8 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
   const [error, setError] = useState("");
   const [helper, setHelper] = useState("");
   const [isPending, startTransition] = useTransition();
+  const documentationSummary = getDocumentationChecklistSummary(lead.documentation_checklist);
+  const recommendedTypes = getRecommendedMessageTypes(lead, documentationSummary.pending);
 
   const handleSelectOption = (option: MessageOption) => {
     setSelectedOptionId(option.id);
@@ -99,6 +102,28 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
         ))}
       </Select>
 
+      <div className="space-y-2">
+        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+          Sugestões rápidas para este lead
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {recommendedTypes.map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setMessageType(type)}
+              className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+                messageType === type
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-surface-low text-foreground hover:bg-accent"
+              }`}
+            >
+              {messageTypeLabels[type]}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <Button type="button" onClick={handleGenerate} disabled={isPending} className="w-full sm:w-auto">
         {isPending ? "Gerando..." : "Gerar opções"}
       </Button>
@@ -162,4 +187,36 @@ export function MessageGenerator({ lead }: { lead: Lead }) {
       </a>
     </div>
   );
+}
+
+function getRecommendedMessageTypes(lead: Lead, pendingDocuments: number): MessageType[] {
+  if (lead.status === "Coletar documentação" && pendingDocuments > 0) {
+    return ["cobrar_documentacao", "documentacao_pronta_analise", "simulacao_financiamento"];
+  }
+
+  if (lead.status === "Documentação em análise") {
+    return ["documentacao_pronta_analise", "analise_aprovada", "analise_condicionada"];
+  }
+
+  if (lead.status === "Análise condicionada") {
+    return ["analise_condicionada", "cobrar_documentacao", "simulacao_financiamento"];
+  }
+
+  if (lead.status === "Análise aprovada") {
+    return ["analise_aprovada", "fechamento", "convite_visita"];
+  }
+
+  if (lead.status === "Análise reprovada") {
+    return ["analise_reprovada", "simulacao_financiamento", "followup_d3"];
+  }
+
+  if (lead.status === "Visita agendada") {
+    return ["convite_visita", "pos_visita", "simulacao_financiamento"];
+  }
+
+  if (lead.status === "Retornar contato") {
+    return ["followup_d1", "followup_d3", "primeiro_contato"];
+  }
+
+  return ["primeiro_contato", "convite_visita", "simulacao_financiamento"];
 }

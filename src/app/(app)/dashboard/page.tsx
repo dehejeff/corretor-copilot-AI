@@ -12,16 +12,20 @@ import {
   WalletCards,
 } from "lucide-react";
 import { ensureProfile, requireUser } from "@/lib/auth";
-import { getDashboardStats, getTasksForToday } from "@/lib/leads";
+import { getDashboardPriorities, getDashboardStats, getTasksForToday } from "@/lib/leads";
+import { CollapsibleSection } from "@/components/collapsible-section";
+import { visitTypeLabels } from "@/lib/constants";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const user = await requireUser();
-  const [profile, stats, tasks] = await Promise.all([
+  const [profile, stats, tasks, priorities] = await Promise.all([
     ensureProfile(user),
     getDashboardStats(user.id),
     getTasksForToday(user.id),
+    getDashboardPriorities(user.id),
   ]);
 
   const cards = [
@@ -89,40 +93,144 @@ export default async function DashboardPage() {
         ))}
       </section>
 
-      <Card className="rounded-[1.75rem]">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Ações urgentes</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tarefas abertas geradas manualmente ou pelo motor de automação.
-            </p>
-          </div>
-          <Link href="/tasks" className="text-sm font-semibold text-primary">
-            Abrir todas
-          </Link>
-        </div>
+      <section className="grid gap-4 xl:grid-cols-2">
+        <PriorityPanel
+          title="Precisa retornar hoje"
+          description="Leads com horário de retomada marcado para hoje."
+          emptyMessage="Nenhum retorno combinado para hoje."
+          items={priorities.returnToday.map(({ lead, helper }) => ({
+            leadId: lead.id,
+            name: lead.name,
+            badge: lead.status,
+            helper: formatDateTime(helper),
+          }))}
+        />
+        <PriorityPanel
+          title="Pasta pronta para subir"
+          description="Leads que já podem ter os documentos enviados para a imobiliária."
+          emptyMessage="Nenhuma pasta pronta para análise neste momento."
+          items={priorities.readyForAnalysis.map(({ lead, helper }) => ({
+            leadId: lead.id,
+            name: lead.name,
+            badge: lead.status,
+            helper,
+          }))}
+        />
+        <PriorityPanel
+          title="Análise condicionada"
+          description="Casos que precisam de complemento ou retorno rápido ao cliente."
+          emptyMessage="Nenhuma análise condicionada aguardando ação."
+          items={priorities.conditionedAnalysis.map(({ lead, helper }) => ({
+            leadId: lead.id,
+            name: lead.name,
+            badge: lead.analysis_eligibility || lead.status,
+            helper,
+          }))}
+        />
+        <PriorityPanel
+          title="Visitas de hoje"
+          description="Visitas já marcadas para acompanhar e confirmar no momento certo."
+          emptyMessage="Nenhuma visita agendada para hoje."
+          items={priorities.visitsToday.map(({ lead, helper }) => ({
+            leadId: lead.id,
+            name: lead.name,
+            badge: lead.visit_type
+              ? visitTypeLabels[lead.visit_type as keyof typeof visitTypeLabels]
+              : lead.status,
+            helper: `${formatDateTime(helper)}${
+              lead.approved_financing_amount
+                ? ` · ${formatCurrency(lead.approved_financing_amount)}`
+                : ""
+            }`,
+          }))}
+        />
+      </section>
 
-        <div className="mt-5 space-y-3">
-          {tasks.slice(0, 4).map((task) => (
-            <div
-              key={task.id}
-              className="flex items-center justify-between gap-4 rounded-[1.2rem] border border-border bg-surface-low px-4 py-4"
-            >
-              <div>
-                <p className="font-medium">{task.title}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{task.lead?.name}</p>
+      <Card className="rounded-[1.75rem]">
+        <CollapsibleSection
+          title="Ações urgentes"
+          description="Tarefas abertas geradas manualmente ou pelo motor de automação."
+          defaultOpen={false}
+          contentClassName="mt-5"
+        >
+          <div className="mb-4 flex items-center justify-end">
+            <Link href="/tasks" className="text-sm font-semibold text-primary">
+              Abrir todas
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {tasks.slice(0, 4).map((task) => (
+              <div
+                key={task.id}
+                className="flex items-center justify-between gap-4 rounded-[1.2rem] border border-border bg-surface-low px-4 py-4"
+              >
+                <div>
+                  <p className="font-medium">{task.title}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{task.lead?.name}</p>
+                </div>
+                <Badge>{task.task_type}</Badge>
               </div>
-              <Badge>{task.task_type}</Badge>
-            </div>
+            ))}
+
+            {tasks.length === 0 ? (
+              <p className="rounded-[1.2rem] border border-border bg-surface-low px-4 py-6 text-sm text-muted-foreground">
+                Nenhuma tarefa aberta para hoje. Quando o cron rodar, os follow-ups aparecerão aqui.
+              </p>
+            ) : null}
+          </div>
+        </CollapsibleSection>
+      </Card>
+    </div>
+  );
+}
+
+function PriorityPanel({
+  title,
+  description,
+  emptyMessage,
+  items,
+}: {
+  title: string;
+  description: string;
+  emptyMessage: string;
+  items: Array<{
+    leadId: string;
+    name: string;
+    badge: string;
+    helper: string;
+  }>;
+}) {
+  return (
+    <Card className="rounded-[1.75rem]">
+      <CollapsibleSection
+        title={title}
+        description={description}
+        defaultOpen={false}
+        contentClassName="mt-5"
+      >
+        <div className="space-y-3">
+          {items.map((item) => (
+            <Link
+              key={`${item.leadId}-${item.badge}`}
+              href={`/leads/${item.leadId}`}
+              className="flex items-center justify-between gap-4 rounded-[1.2rem] border border-border bg-surface-low px-4 py-4 transition-colors hover:bg-accent/30"
+            >
+              <div className="min-w-0">
+                <p className="truncate font-medium">{item.name}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{item.helper}</p>
+              </div>
+              <Badge>{item.badge}</Badge>
+            </Link>
           ))}
 
-          {tasks.length === 0 ? (
+          {items.length === 0 ? (
             <p className="rounded-[1.2rem] border border-border bg-surface-low px-4 py-6 text-sm text-muted-foreground">
-              Nenhuma tarefa aberta para hoje. Quando o cron rodar, os follow-ups aparecerão aqui.
+              {emptyMessage}
             </p>
           ) : null}
         </div>
-      </Card>
-    </div>
+      </CollapsibleSection>
+    </Card>
   );
 }

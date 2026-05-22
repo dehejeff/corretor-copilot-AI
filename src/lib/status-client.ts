@@ -15,4 +15,11 @@ export async function updateLeadStatusApi(
     const data = (await response.json().catch(() => ({}))) as { error?: string };
     throw new Error(data.error || "Não foi possível atualizar o status do lead.");
   }
+
+  return (await response.json()) as {
+    ok: boolean;
+    status: string;
+    visit_type?: "Escritório" | "Empreendimento" | null;
+    notice?: string | null;
+  };
 }

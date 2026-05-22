@@ -1,4 +1,5 @@
 import { differenceInCalendarDays, isValid, parseISO } from "date-fns";
+import { getDocumentationChecklistSummary } from "@/lib/documentation";
 import type { Lead, LeadTemperature } from "@/lib/types";
 
 export function calculateLeadScore(input: Partial<Lead>) {
@@ -45,28 +46,38 @@ export function getLeadTemperature(score: number): LeadTemperature {
 }
 
 export function getRecommendedNextAction(lead: Partial<Lead>) {
+  const documentationSummary = getDocumentationChecklistSummary(lead.documentation_checklist);
+
   if (lead.status === "Visita agendada") {
     return "Confirme os detalhes da visita e envie um lembrete no WhatsApp.";
   }
 
   if (lead.status === "Coletar documentação") {
-    return "Solicite os documentos pendentes e organize a pasta para envio à análise.";
+    if (documentationSummary.pending > 0) {
+      return `Solicite os ${documentationSummary.pending} documento(s) pendente(s) e deixe a pasta pronta para subir na imobiliária.`;
+    }
+
+    return "Solicite os documentos pendentes e organize a pasta do cliente para subir na imobiliária.";
   }
 
   if (lead.status === "Documentação em análise") {
-    return "Acompanhe a análise de crédito e prepare o cliente para aprovado, condicionado ou reprovado.";
+    return "Acompanhe o retorno da imobiliária para entender se o cliente está apto e qual faixa de financiamento foi liberada.";
   }
 
   if (lead.status === "Análise condicionada") {
-    return "Explique as pendências, colete os complementos e retorne a documentação para nova validação.";
+    if (documentationSummary.pending > 0) {
+      return `A imobiliária voltou com condicionantes. Reforce com o cliente as ${documentationSummary.pending} pendência(s) e complemente a pasta para nova validação.`;
+    }
+
+    return "Explique as condicionantes, colete os complementos e reenvie a pasta para nova validação.";
   }
 
   if (lead.status === "Análise aprovada") {
-    return "Comunique a aprovação e avance com os próximos passos comerciais e contratuais.";
+    return "Comunique que o cliente está apto, explique a faixa de financiamento aprovada e avance com os próximos passos.";
   }
 
   if (lead.status === "Análise reprovada") {
-    return "Reposicione o lead com cuidado, entenda alternativas e registre o motivo da reprovação.";
+    return "Explique com cuidado que o cliente não foi considerado apto neste momento, registre o motivo e avalie alternativas.";
   }
 
   if (lead.temperature === "Quente") {

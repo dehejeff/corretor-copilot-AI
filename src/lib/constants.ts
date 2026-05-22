@@ -54,6 +54,14 @@ export const visitTypeLabels = {
   Empreendimento: "Visita ao empreendimento",
 } as const;
 
+export const analysisEligibilityOptions = ["Apto", "Nao apto", "Condicionado"] as const;
+
+export const analysisEligibilityLabels = {
+  Apto: "Apto",
+  "Nao apto": "Não apto",
+  Condicionado: "Condicionado",
+} as const;
+
 export const messageTypes = [
   "primeiro_contato",
   "followup_d1",
@@ -65,6 +73,11 @@ export const messageTypes = [
   "vou_pensar",
   "simulacao_financiamento",
   "pos_visita",
+  "cobrar_documentacao",
+  "documentacao_pronta_analise",
+  "analise_condicionada",
+  "analise_aprovada",
+  "analise_reprovada",
   "fechamento",
 ] as const;
 
@@ -79,5 +92,10 @@ export const messageTypeLabels = {
   vou_pensar: "Resposta para 'vou pensar'",
   simulacao_financiamento: "Simulação de financiamento",
   pos_visita: "Pós-visita",
+  cobrar_documentacao: "Cobrança de documentação",
+  documentacao_pronta_analise: "Pasta pronta para análise",
+  analise_condicionada: "Análise condicionada",
+  analise_aprovada: "Análise aprovada",
+  analise_reprovada: "Análise reprovada",
   fechamento: "Fechamento",
 } as const;

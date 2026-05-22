@@ -303,6 +303,96 @@ const templateDictionary: TemplateDictionary = {
         "Me fala sinceramente o que gostou e o que não gostou para eu conseguir te direcionar melhor.",
     },
   ],
+  cobrar_documentacao: [
+    {
+      tone: "Mais consultivo",
+      template:
+        "Olá, [Nome do lead]. Para conseguirmos avançar com sua análise com mais segurança, você consegue me enviar a documentação pendente? Se quiser, eu também posso te orientar item por item.",
+    },
+    {
+      tone: "Mais acolhedor",
+      template:
+        "Oi, [Nome do lead]. Passando para te ajudar com a documentação que falta. Quer que eu te mande a lista organizada para facilitar o envio?",
+    },
+    {
+      tone: "Mais direto",
+      template:
+        "Boa tarde, [Nome do lead]. Para seguirmos com seu processo, preciso receber a documentação pendente. Consegue me encaminhar ainda hoje ou prefere que eu te lembre em outro horário?",
+    },
+    {
+      tone: "Mais objetivo",
+      template:
+        "Oi, [Nome do lead]. Assim que você me enviar os documentos pendentes, eu consigo dar sequência no processo sem perder tempo.",
+    },
+  ],
+  documentacao_pronta_analise: [
+    {
+      tone: "Mais consultivo",
+      template:
+        "Olá, [Nome do lead]. Sua documentação está organizada e a pasta está pronta para eu subir na imobiliária. Posso seguir com isso agora para aguardarmos o retorno da análise?",
+    },
+    {
+      tone: "Mais acolhedor",
+      template:
+        "Oi, [Nome do lead]. Deixei sua pasta organizada para subir na imobiliária. Se estiver tudo certo para você, já posso encaminhar e acompanhar o retorno da análise.",
+    },
+    {
+      tone: "Mais direto",
+      template:
+        "Boa tarde, [Nome do lead]. Sua pasta está pronta. Quer que eu suba os documentos na imobiliária agora para aguardarmos o retorno da análise?",
+    },
+  ],
+  analise_condicionada: [
+    {
+      tone: "Mais consultivo",
+      template:
+        "Olá, [Nome do lead]. A imobiliária analisou sua pasta e o retorno veio condicionado, então ainda precisamos complementar algumas informações para validar sua aptidão e o financiamento. Posso te explicar com calma os próximos ajustes?",
+    },
+    {
+      tone: "Mais acolhedor",
+      template:
+        "Oi, [Nome do lead]. Recebi o retorno da imobiliária e tivemos algumas pendências complementares na sua pasta. Fica tranquilo que eu te ajudo a organizar isso para reenviarmos da forma certa.",
+    },
+    {
+      tone: "Mais direto",
+      template:
+        "Boa tarde, [Nome do lead]. A imobiliária voltou com condicionantes e precisamos complementar a pasta. Posso te passar agora exatamente o que falta?",
+    },
+  ],
+  analise_aprovada: [
+    {
+      tone: "Mais consultivo",
+      template:
+        "Olá, [Nome do lead]. Tenho uma boa notícia: a imobiliária aprovou sua análise. Quer que eu te explique os próximos passos e a condição de financiamento liberada para avançarmos com segurança?",
+    },
+    {
+      tone: "Mais acolhedor",
+      template:
+        "Oi, [Nome do lead]. Sua análise foi aprovada, parabéns. Se quiser, já posso te orientar sobre a próxima etapa e a faixa de financiamento liberada para não perdermos ritmo.",
+    },
+    {
+      tone: "Mais direto",
+      template:
+        "Boa tarde, [Nome do lead]. A imobiliária aprovou sua análise e já temos o retorno sobre sua aptidão. Podemos avançar agora para os próximos passos do processo?",
+    },
+  ],
+  analise_reprovada: [
+    {
+      tone: "Mais consultivo",
+      template:
+        "Olá, [Nome do lead]. Recebi o retorno da imobiliária e, neste momento, sua análise não foi aprovada. Quero te explicar com clareza o cenário e ver com você quais alternativas ainda fazem sentido.",
+    },
+    {
+      tone: "Mais acolhedor",
+      template:
+        "Oi, [Nome do lead]. Tivemos um retorno negativo da imobiliária na análise atual, mas isso não significa que ficamos sem caminhos. Posso te explicar com calma o que aconteceu e o que ainda podemos avaliar?",
+    },
+    {
+      tone: "Mais direto",
+      template:
+        "Boa tarde, [Nome do lead]. A análise atual foi reprovada. Se fizer sentido, posso te passar o motivo e avaliar com você alternativas possíveis para o próximo passo.",
+    },
+  ],
   fechamento: [
     {
       tone: "Mais consultivo",

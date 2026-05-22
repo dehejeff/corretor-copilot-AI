@@ -3,6 +3,7 @@ import type {
   leadStatuses,
   leadTemperatures,
   messageTypes,
+  analysisEligibilityOptions,
   visitTypes,
 } from "@/lib/constants";
 
@@ -10,7 +11,16 @@ export type LeadSource = (typeof leadSources)[number];
 export type LeadStatus = (typeof leadStatuses)[number];
 export type LeadTemperature = (typeof leadTemperatures)[number];
 export type MessageType = (typeof messageTypes)[number];
+export type AnalysisEligibility = (typeof analysisEligibilityOptions)[number];
 export type VisitType = (typeof visitTypes)[number];
+export type DocumentationItemStatus = "Pendente" | "Recebido" | "Nao se aplica";
+
+export interface DocumentationChecklistItem {
+  key: string;
+  label: string;
+  status: DocumentationItemStatus;
+  notes: string;
+}
 
 export interface MessageOption {
   id: string;
@@ -46,6 +56,11 @@ export interface Lead {
   requested_visit: boolean;
   visit_date: string | null;
   visit_type: VisitType | string | null;
+  analysis_returned_at: string | null;
+  analysis_eligibility: AnalysisEligibility | string | null;
+  approved_financing_amount: number | null;
+  analysis_notes: string | null;
+  documentation_checklist: DocumentationChecklistItem[] | null;
   researching_only: boolean;
   contact_attempts: number;
   notes: string | null;

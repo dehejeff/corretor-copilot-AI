@@ -11,9 +11,15 @@ export async function createClient() {
         return cookieStore.getAll();
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          cookieStore.set(name, value, options),
-        );
+        cookiesToSet.forEach(({ name, value, options }) => {
+          try {
+            cookieStore.set(name, value, options);
+          } catch {
+            // Server Components can read cookies but cannot mutate them.
+            // In those contexts Supabase may still attempt to refresh state;
+            // we safely ignore the write and let Route Handlers / Server Actions persist it.
+          }
+        });
       },
     },
   });

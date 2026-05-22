@@ -23,8 +23,13 @@ export async function PATCH(
       visit_type: body.visit_type,
     });
 
-    await updateLeadStatus(user.id, values.leadId, values.status, values.visit_type);
-    return NextResponse.json({ ok: true });
+    const result = await updateLeadStatus(user.id, values.leadId, values.status, values.visit_type);
+    return NextResponse.json({
+      ok: true,
+      status: result.lead.status,
+      visit_type: result.lead.visit_type,
+      notice: result.workflowNotice,
+    });
   } catch (error) {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 400 });
   }

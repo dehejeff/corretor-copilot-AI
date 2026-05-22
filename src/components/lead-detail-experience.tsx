@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { ArrowLeft, Bot, ChevronDown, ChevronUp, MessageCircle, Sparkles } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import { ArrowLeft, Bot, MessageCircle, Sparkles } from "lucide-react";
 import type {
   Conversation,
   ConversationMessage,
@@ -11,7 +11,11 @@ import type {
   Lead,
   Profile,
 } from "@/lib/types";
-import { visitTypeLabels } from "@/lib/constants";
+import {
+  analysisEligibilityLabels,
+  visitTypeLabels,
+} from "@/lib/constants";
+import { getDocumentationChecklistSummary } from "@/lib/documentation";
 import {
   buildWhatsappUrl,
   formatCurrency,
@@ -20,6 +24,7 @@ import {
   formatRelativeDate,
 } from "@/lib/utils";
 import { ConversationPanel } from "@/components/conversation-panel";
+import { CollapsibleSection } from "@/components/collapsible-section";
 import { MessageGenerator } from "@/components/message-generator";
 import { LeadCallGuide } from "@/components/lead-call-guide";
 
@@ -54,7 +59,7 @@ function getLeadStageMeta(status: string) {
     return {
       label: "Documentação",
       tone: "text-orange-700 bg-orange-100",
-      description: "Fase de reunir documentos e organizar a pasta para análise.",
+      description: "Fase de reunir os documentos e preparar a pasta do cliente para subir na imobiliária.",
     };
   }
 
@@ -62,7 +67,7 @@ function getLeadStageMeta(status: string) {
     return {
       label: "Análise",
       tone: "text-orange-700 bg-orange-100",
-      description: "Documentos enviados. Agora o foco é acompanhar o retorno da análise.",
+      description: "Pasta subida na imobiliária. Agora o foco é aguardar e acompanhar o retorno sobre aptidão e faixa de financiamento.",
     };
   }
 
@@ -70,7 +75,7 @@ function getLeadStageMeta(status: string) {
     return {
       label: "Resultado aprovado",
       tone: "text-emerald-700 bg-emerald-100",
-      description: "Análise concluída com aprovação. Próximo passo é conduzir o fechamento.",
+      description: "A imobiliária confirmou que o cliente está apto. Agora é hora de conduzir os próximos passos com base no retorno do financiamento.",
     };
   }
 
@@ -78,7 +83,7 @@ function getLeadStageMeta(status: string) {
     return {
       label: "Resultado condicionado",
       tone: "text-yellow-800 bg-yellow-100",
-      description: "A análise retornou com pendências. Vale orientar o cliente e complementar a pasta.",
+      description: "A imobiliária retornou com condicionantes. Vale orientar o cliente, complementar a pasta e reenviar para análise.",
     };
   }
 
@@ -86,7 +91,7 @@ function getLeadStageMeta(status: string) {
     return {
       label: "Resultado reprovado",
       tone: "text-rose-700 bg-rose-100",
-      description: "A análise não aprovou o caso atual. É importante registrar o motivo e avaliar alternativas.",
+      description: "A imobiliária entendeu que o cliente não está apto neste cenário atual. É importante registrar o motivo e avaliar alternativas.",
     };
   }
 
@@ -114,6 +119,7 @@ export function LeadDetailExperience({
   conversationMessages,
   conversationSuggestions,
   whatsappConfigured,
+  dataTabSections,
 }: {
   lead: Lead;
   profile: Profile;
@@ -123,9 +129,9 @@ export function LeadDetailExperience({
   conversationMessages: ConversationMessage[];
   conversationSuggestions: ConversationSuggestion[];
   whatsappConfigured: boolean;
+  dataTabSections?: ReactNode;
 }) {
   const [activeTab, setActiveTab] = useState<TabId>("dados");
-  const [callGuideExpanded, setCallGuideExpanded] = useState(false);
 
   const scoreStroke = useMemo(() => {
     const normalized = Math.min(100, Math.max(0, lead.score));
@@ -133,6 +139,7 @@ export function LeadDetailExperience({
     return circumference - (normalized / 100) * circumference;
   }, [lead.score]);
   const stageMeta = getLeadStageMeta(lead.status);
+  const documentationSummary = getDocumentationChecklistSummary(lead.documentation_checklist);
 
   return (
     <div className="space-y-4">
@@ -212,34 +219,65 @@ export function LeadDetailExperience({
       </section>
 
       <section className="rounded-xl border border-primary/10 bg-white p-4 shadow-[var(--shadow-soft)]">
-        <div className="mb-2 flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <h3 className="text-xs font-bold tracking-[0.2em] text-primary uppercase">
-            Copilot Insight
-          </h3>
-        </div>
-        <p className="text-sm leading-7 text-foreground">
-          {nextAction}
-        </p>
+        <CollapsibleSection
+          title="Copilot Insight"
+          description="Resumo rápido do que mais faz sentido fazer agora."
+          defaultOpen={false}
+          contentClassName="mt-3"
+        >
+          <div className="mb-2 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-xs font-bold tracking-[0.2em] text-primary uppercase">
+              Ação sugerida
+            </span>
+          </div>
+          <p className="text-sm leading-7 text-foreground">{nextAction}</p>
+        </CollapsibleSection>
       </section>
 
       <section className="rounded-xl border border-border bg-white p-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-              Etapa Atual
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${stageMeta.tone}`}>
-                {stageMeta.label}
-              </span>
-              <span className="text-sm font-semibold text-foreground">{lead.status}</span>
+        <CollapsibleSection
+          title="Etapa Atual"
+          description={stageMeta.description}
+          defaultOpen={false}
+          summary={
+            <div className="grid gap-2 sm:min-w-[240px] sm:grid-cols-2">
+              <MiniInfo label="Etapa" value={lead.status} />
+              <MiniInfo label="Docs pendentes" value={`${documentationSummary.pending}`} />
+              <MiniInfo
+                label="Resultado da análise"
+                value={
+                  lead.analysis_eligibility
+                    ? analysisEligibilityLabels[
+                        lead.analysis_eligibility as keyof typeof analysisEligibilityLabels
+                      ]
+                    : "Não informado"
+                }
+              />
+              <MiniInfo label="Retorno" value={formatDateTime(lead.next_followup_at)} />
             </div>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-              {stageMeta.description}
-            </p>
+          }
+          contentClassName="mt-4"
+        >
+          <div className="flex flex-wrap items-start gap-3">
+            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${stageMeta.tone}`}>
+              {stageMeta.label}
+            </span>
+            <span className="text-sm font-semibold text-foreground">{lead.status}</span>
           </div>
-          <div className="grid gap-2 sm:min-w-[240px]">
+
+          <div className="mt-4 grid gap-2 sm:min-w-[240px] sm:grid-cols-2 lg:grid-cols-3">
+            <MiniInfo label="Docs pendentes" value={`${documentationSummary.pending}`} />
+            <MiniInfo
+              label="Resultado da análise"
+              value={
+                lead.analysis_eligibility
+                  ? analysisEligibilityLabels[
+                      lead.analysis_eligibility as keyof typeof analysisEligibilityLabels
+                    ]
+                  : "Não informado"
+              }
+            />
             <MiniInfo
               label="Tipo de visita"
               value={lead.visit_type ? visitTypeLabels[lead.visit_type as keyof typeof visitTypeLabels] : "Não informado"}
@@ -247,7 +285,7 @@ export function LeadDetailExperience({
             <MiniInfo label="Visita" value={formatDateTime(lead.visit_date)} />
             <MiniInfo label="Retorno" value={formatDateTime(lead.next_followup_at)} />
           </div>
-        </div>
+        </CollapsibleSection>
       </section>
 
       <div className="scrollbar-hide flex overflow-x-auto border-b border-border">
@@ -283,21 +321,33 @@ export function LeadDetailExperience({
       <div className="space-y-4">
         {activeTab === "dados" ? (
           <>
-            <section className="space-y-2">
-              <h4 className="px-1 text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                Perfil de interesse
-              </h4>
-              <div className="grid grid-cols-2 gap-3">
-                <DataBox label="Bairro" value={lead.neighborhood || "Não informado"} />
-                <DataBox label="Tipo" value={lead.property_type || "Não informado"} />
-              </div>
+            <section className="rounded-xl border border-border bg-white p-4">
+              <CollapsibleSection
+                title="Perfil de interesse"
+                description="Informações principais do imóvel e da região buscada."
+                defaultOpen={false}
+                summary={
+                  <div className="grid grid-cols-2 gap-3">
+                    <DataBox label="Bairro" value={lead.neighborhood || "Não informado"} />
+                    <DataBox label="Tipo" value={lead.property_type || "Não informado"} />
+                  </div>
+                }
+                contentClassName="mt-4"
+              >
+                <div className="grid grid-cols-2 gap-3">
+                  <DataBox label="Bairro" value={lead.neighborhood || "Não informado"} />
+                  <DataBox label="Tipo" value={lead.property_type || "Não informado"} />
+                </div>
+              </CollapsibleSection>
             </section>
 
-            <section className="rounded-xl border border-border bg-white">
-              <div className="p-4">
-                <h4 className="mb-3 text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                  Detalhes financeiros
-                </h4>
+            <section className="rounded-xl border border-border bg-white p-4">
+              <CollapsibleSection
+                title="Detalhes financeiros"
+                description="Resumo completo do perfil financeiro e comercial do lead."
+                defaultOpen={false}
+                contentClassName="mt-4"
+              >
                 <div className="space-y-3">
                   <Row label="Entrada disponível" value={formatCurrency(lead.down_payment)} />
                   <Row label="Renda mensal" value={lead.income_range || "Não informado"} />
@@ -309,59 +359,100 @@ export function LeadDetailExperience({
                     label="Tipo de visita"
                     value={lead.visit_type ? visitTypeLabels[lead.visit_type as keyof typeof visitTypeLabels] : "Não informado"}
                   />
+                  <Row
+                    label="Retorno da análise"
+                    value={formatDateTime(lead.analysis_returned_at)}
+                  />
+                  <Row
+                    label="Resultado da análise"
+                    value={
+                      lead.analysis_eligibility
+                        ? analysisEligibilityLabels[
+                            lead.analysis_eligibility as keyof typeof analysisEligibilityLabels
+                          ]
+                        : "Não informado"
+                    }
+                  />
+                  <Row
+                    label="Valor aprovado"
+                    value={formatCurrency(lead.approved_financing_amount)}
+                  />
                   <Row label="Data da visita" value={formatDateTime(lead.visit_date)} />
                   <Row label="Lembrete de retorno" value={formatDateTime(lead.next_followup_at)} />
                   <Row label="Origem" value={String(lead.source)} />
                   <Row label="Status atual" value={String(lead.status)} />
                 </div>
-              </div>
+              </CollapsibleSection>
             </section>
 
             <section className="rounded-xl border border-border bg-white p-4">
-              <h4 className="mb-3 text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                Observações
-              </h4>
-              <p className="text-sm leading-7 text-foreground/90">
-                {lead.notes || "Nenhuma observação registrada até o momento."}
-              </p>
+              <CollapsibleSection
+                title="Retorno da Imobiliária"
+                description="Observações e condições que vieram da análise."
+                defaultOpen={false}
+                contentClassName="mt-4"
+              >
+                <p className="text-sm leading-7 text-foreground/90">
+                  {lead.analysis_notes || "Nenhuma observação da imobiliária registrada até o momento."}
+                </p>
+              </CollapsibleSection>
             </section>
+
+            <section className="rounded-xl border border-border bg-white p-4">
+              <CollapsibleSection
+                title="Observações"
+                description="Anotações livres do corretor sobre este lead."
+                defaultOpen={false}
+                contentClassName="mt-4"
+              >
+                <p className="text-sm leading-7 text-foreground/90">
+                  {lead.notes || "Nenhuma observação registrada até o momento."}
+                </p>
+              </CollapsibleSection>
+            </section>
+
+            {dataTabSections}
           </>
         ) : null}
 
         {activeTab === "historico" ? (
-          <section className="space-y-2">
-            <h4 className="px-1 text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-              Histórico recente
-            </h4>
-            <div className="space-y-3">
-              {interactions.length ? (
-                interactions.map((interaction, index) => (
-                  <div
-                    key={interaction.id}
-                    className="relative flex gap-3 before:absolute before:bottom-[-12px] before:left-2 before:top-6 before:w-[2px] before:bg-border last:before:hidden"
-                  >
+          <section className="rounded-xl border border-border bg-white p-4">
+            <CollapsibleSection
+              title="Histórico recente"
+              description="Últimas interações e movimentações deste lead."
+              defaultOpen={false}
+              contentClassName="mt-4"
+            >
+              <div className="space-y-3">
+                {interactions.length ? (
+                  interactions.map((interaction, index) => (
                     <div
-                      className={`relative z-10 mt-1 h-4 w-4 rounded-full ${
-                        index === 0 ? "bg-primary" : "bg-surface-high"
-                      }`}
-                    />
-                    <div className="flex-1 pb-4">
-                      <p className="text-sm font-semibold text-foreground">{interaction.type}</p>
-                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                        {interaction.message}
-                      </p>
-                      <span className="text-xs text-muted-foreground">
-                        {formatRelativeDate(interaction.created_at)}
-                      </span>
+                      key={interaction.id}
+                      className="relative flex gap-3 before:absolute before:bottom-[-12px] before:left-2 before:top-6 before:w-[2px] before:bg-border last:before:hidden"
+                    >
+                      <div
+                        className={`relative z-10 mt-1 h-4 w-4 rounded-full ${
+                          index === 0 ? "bg-primary" : "bg-surface-high"
+                        }`}
+                      />
+                      <div className="flex-1 pb-4">
+                        <p className="text-sm font-semibold text-foreground">{interaction.type}</p>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                          {interaction.message}
+                        </p>
+                        <span className="text-xs text-muted-foreground">
+                          {formatRelativeDate(interaction.created_at)}
+                        </span>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="rounded-xl border border-border bg-white p-4 text-sm text-muted-foreground">
+                    Ainda não há interações registradas para este lead.
                   </div>
-                ))
-              ) : (
-                <div className="rounded-xl border border-border bg-white p-4 text-sm text-muted-foreground">
-                  Ainda não há interações registradas para este lead.
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </CollapsibleSection>
           </section>
         ) : null}
 
@@ -378,43 +469,31 @@ export function LeadDetailExperience({
         {activeTab === "ia" ? (
           <div className="space-y-4">
             <section className="rounded-xl border border-border bg-white p-4">
-              <div className="mb-4 flex items-center justify-between">
-                <h4 className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                  Gerador de mensagem
-                </h4>
-                <Bot className="h-4 w-4 text-primary" />
-              </div>
-              <MessageGenerator lead={lead} />
+              <CollapsibleSection
+                title="Gerador de mensagem"
+                description="Sugestões rápidas para responder sem precisar pensar em tudo do zero."
+                defaultOpen={false}
+                contentClassName="mt-4"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                    Sugestões rápidas
+                  </span>
+                  <Bot className="h-4 w-4 text-primary" />
+                </div>
+                <MessageGenerator lead={lead} />
+              </CollapsibleSection>
             </section>
 
             <section className="rounded-xl border border-border bg-white p-4">
-              <button
-                type="button"
-                onClick={() => setCallGuideExpanded((current) => !current)}
-                className="flex w-full items-start justify-between gap-3 text-left"
+              <CollapsibleSection
+                title="Guia de ligação"
+                description="Conduza a chamada, registre objeções e defina o próximo passo."
+                defaultOpen={false}
+                contentClassName="mt-4"
               >
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-                    Guia de ligação
-                  </h4>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Conduza a chamada, registre objeções e defina o próximo passo.
-                  </p>
-                </div>
-                <span className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface-low text-muted-foreground">
-                  {callGuideExpanded ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </span>
-              </button>
-
-              {callGuideExpanded ? (
-                <div className="mt-4">
-                  <LeadCallGuide lead={lead} profile={profile} />
-                </div>
-              ) : null}
+                <LeadCallGuide lead={lead} profile={profile} />
+              </CollapsibleSection>
             </section>
           </div>
         ) : null}

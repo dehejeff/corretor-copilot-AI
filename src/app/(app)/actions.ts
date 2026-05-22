@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as XLSX from "xlsx";
 import { requireUser } from "@/lib/auth";
-import { buildImportLead, createLead, markTaskAsDone, recordInteraction, updateLead, updateLeadStatus } from "@/lib/leads";
+import { buildImportLead, createLead, markTaskAsDone, recordInteraction, updateDocumentationChecklist, updateLead, updateLeadStatus } from "@/lib/leads";
+import { normalizeDocumentationChecklist } from "@/lib/documentation";
 import { leadSchema, completeTaskSchema, updateLeadStatusSchema } from "@/lib/validations";
-import type { LeadStatus } from "@/lib/types";
+import type { DocumentationChecklistItem, LeadStatus } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 
 export async function createLeadAction(formData: FormData) {
@@ -22,11 +23,14 @@ export async function createLeadAction(formData: FormData) {
 export async function updateLeadAction(leadId: string, formData: FormData) {
   const user = await requireUser();
   const values = leadSchema.parse(Object.fromEntries(formData.entries()));
-  await updateLead(user.id, leadId, values);
+  const result = await updateLead(user.id, leadId, values);
   revalidatePath(`/leads/${leadId}`);
   revalidatePath("/dashboard");
   revalidatePath("/leads");
   revalidatePath("/kanban");
+  if (result.workflowNotice) {
+    redirect(`/leads/${leadId}?notice=${encodeURIComponent(result.workflowNotice)}`);
+  }
 }
 
 export async function deleteLeadAction(formData: FormData) {
@@ -100,8 +104,30 @@ export async function updateLeadStatusAction(leadId: string, status: LeadStatus)
     status,
   });
 
-  await updateLeadStatus(user.id, values.leadId, values.status);
+  const result = await updateLeadStatus(user.id, values.leadId, values.status);
   revalidatePath("/kanban");
   revalidatePath("/dashboard");
   revalidatePath(`/leads/${leadId}`);
+  if (result.workflowNotice) {
+    redirect(`/leads/${leadId}?notice=${encodeURIComponent(result.workflowNotice)}`);
+  }
+}
+
+export async function updateDocumentationChecklistAction(leadId: string, formData: FormData) {
+  const user = await requireUser();
+  const rawChecklist = String(formData.get("documentation_checklist") || "[]");
+  const checklist = JSON.parse(rawChecklist) as DocumentationChecklistItem[];
+
+  const result = await updateDocumentationChecklist(
+    user.id,
+    leadId,
+    normalizeDocumentationChecklist(checklist),
+  );
+  revalidatePath(`/leads/${leadId}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/leads");
+  revalidatePath("/kanban");
+  if (result.workflowNotice) {
+    redirect(`/leads/${leadId}?notice=${encodeURIComponent(result.workflowNotice)}`);
+  }
 }
